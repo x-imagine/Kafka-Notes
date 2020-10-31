@@ -28,12 +28,12 @@ source /etc/profile
 ![](pic/01QuickStart/jdk.png)
 
 ### zookeeper
-- 解压、设置环境变量（同上）
+- 解压、设置环境变量（同上）   
 ![](pic/01QuickStart/zookeeper0.png)
 ![](pic/01QuickStart/zookeeper1.png)
-- 创建文件目录、配置
+- 创建文件目录、配置   
 ![](pic/01QuickStart/zookeeper3.png)
-- 启动zookeeper
+- 启动zookeeper   
 ![](pic/01QuickStart/zookeeper2.png)
 
 ### Kafka
@@ -72,5 +72,5 @@ kafka-console-consumer.sh --topic hello-topic --from-beginning --bootstrap-serve
 ```
 rm -rf /tmp/kafka-logs /tmp/zookeeper
 ```
-清除后，消费者无任何数据
+清除后，消费者无任何数据   
 ![](pic/01QuickStart/clean.png)
