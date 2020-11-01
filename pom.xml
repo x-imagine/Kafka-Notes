@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.dce.kafka</groupId>
-    <artifactId>kafkastudy</artifactId>
+    <artifactId>Kafka-Notes</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
