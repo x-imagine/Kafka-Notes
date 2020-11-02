@@ -61,8 +61,11 @@ public class TopicOperator {
             LOGGER.info("--------------   topic name   -------------------- :" + s);
         });
     }
+
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        TopicOperator.createTopic("book-topic");
+        String topicName = "book-topic";
+        TopicOperator.createTopic(topicName);
         TopicOperator.topicList();
+        // TopicOperator.delTopic(topicName);
     }
 }

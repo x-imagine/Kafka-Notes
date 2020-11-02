@@ -26,6 +26,6 @@ public class AdminClientFactory {
     }
 
     public static void main(String[] args) {
-        AdminClient adminClient = AdminClientFactory.getAdminClient();
+        AdminClientFactory.getAdminClient();
     }
 }
