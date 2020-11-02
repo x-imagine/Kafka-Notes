@@ -26,52 +26,9 @@ public class AdminSample {
         return adminClient;
     }
 
-    /**
-     * 创建topic，打印topic信息
-     */
-    public static void createTopic(String topicName) {
-        AdminClient adminClient = adminClient();
-        short partitionsNum = 1;
-        short refactor = 1;
-        NewTopic newTopic = new NewTopic(topicName, partitionsNum, refactor);
-        CreateTopicsResult topics = adminClient.createTopics(Arrays.asList(newTopic));
-        System.out.println("--------------   topics   -------------------- :" + topics);
-    }
 
-    /**
-     * 获取topic列表
-     */
-    public static void topicList() throws ExecutionException, InterruptedException {
-        AdminClient adminClient = adminClient();
-        ListTopicsResult listTopicsResult = adminClient.listTopics();
-        System.out.println("--------------   topic size   -------------------- :" + listTopicsResult.names().get().size());
-        listTopicsResult.names().get().stream().forEach(s -> {
-            System.out.println("--------------   topic name   -------------------- :" + s);
-        });
 
-        ListTopicsOptions listTopicsOptions = new ListTopicsOptions();
-        listTopicsOptions.listInternal(true);
-        listTopicsResult = adminClient.listTopics(listTopicsOptions);
-        listTopicsResult.listings().get().stream().forEach(topic -> {
-            System.out.println("--------------   topic list   -------------------- " + topic);
-        });
-    }
 
-    /**
-     * 删除topic
-     *
-     * @throws ExecutionException
-     * @throws InterruptedException
-     */
-    public static void delTopic(String topicName) throws ExecutionException, InterruptedException {
-        AdminClient adminClient = adminClient();
-        adminClient.deleteTopics(Arrays.asList(topicName));
-        ListTopicsResult listTopicsResult = adminClient.listTopics();
-        System.out.println("--------------   topic size   -------------------- :" + listTopicsResult.names().get().size());
-        listTopicsResult.names().get().stream().forEach(s -> {
-            System.out.println("--------------   topic name   -------------------- :" + s);
-        });
-    }
 
     /**
      * 获取配置信息（用于kafka监控）
@@ -116,14 +73,5 @@ public class AdminSample {
         partitionsMap.put(TOPIC_NAME, newPartitions);
 
         final CreatePartitionsResult partitionsResult = adminClient.createPartitions(partitionsMap);
-    }
-
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        createTopic("test-topic");
-//        topicList();
-        // incrPartitions();
-         delTopic("test-topic");
-        // descConfig();
-        // alterConfig();
     }
 }
