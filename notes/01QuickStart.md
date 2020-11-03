@@ -11,9 +11,9 @@
 ```
 tar -xzvf jdk-8u121-linux-x64.tar.gz
 ```
-- 配置环境变量(root用户为例)
+- 配置环境变量
 ```
-vi /etc/profile
+vi ~/.bash_profile
 ```
 ```
 export PATH
@@ -23,7 +23,7 @@ export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
 export PATH=${JAVA_HOME}/bin:$PATH:.
 ```
 ```
-source /etc/profile
+source ~/.bash_profile
 ```
 ![](pic/01QuickStart/jdk.png)
 
