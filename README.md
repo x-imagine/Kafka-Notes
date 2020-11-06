@@ -9,7 +9,7 @@
 ## APIS
 - [Admin API](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/02AdminClientAPI.md)
 
-## CONFIGURATION
+## Configuration
 - [Configuration](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/03Configuration.md)
 
 ## Commands
