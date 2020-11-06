@@ -1,9 +1,10 @@
 # Kafka-Notes
 
 ## Introduction
+- [Introduction](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/00Introduction.md)
 
 ## Quick Start
-- [Quick Start](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/00Introduction.md)
+- [Quick Start](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/01QuickStart.md)
 
 ## APIS
 - [Admin API](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/02AdminClientAPI.md)
