@@ -10,3 +10,5 @@ systemctl stop firewalld.service
 #禁止开机启动
 systemctl disable firewalld.service
 ```
+
+3. auto.leader.rebalance.enable中的leader rebalance指的是什么平衡？

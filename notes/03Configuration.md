@@ -33,6 +33,34 @@
 ### compression.type
 重要，压缩类型，支持标准的压缩方式如：'gzip', 'snappy', 'lz4', 'zstd'，可设置为不压缩：uncompressed。默认为producer为自带的原始压缩方式
 
+### delete.topic.enable
+重要，默认true，如不允许通过admin工具删除topic，将其设置为false
+
+### host.name
+重要，已作废，Broker主机IP地址或域名，当listeners未设置是用于替代之用
+
+### auto.leader.rebalance.enable
+重要，是否允许leader rebalance，默认true。若允许kafka controller开启一个后台进程   
+在leader.imbalance.check.interval.seconds所设置的时间频度内，在失衡百分比在leader.imbalance.per.broker.percentage所设置的比例以上时
+进行leader重选举
+
+### leader.imbalance.check.interval.seconds
+重要，进行rebalance检查处理的时间频度参数，long，默认300
+
+### leader.imbalance.per.broker.percentage
+重要，允许broker的leader失衡的比例，默认10（%）
+
+
+
+
+
+### port
+已作废，Broker端口
+
+
+
+
+
 ### listeners
 重要，Broker监听，Broker间，Client与Broker间通信时，建立连接的关键信息，设置多个用逗号分隔。   
 格式：protocol://host:port,protocol2://host2:port2
@@ -53,14 +81,14 @@ listener.security.protocol.map=PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_P
 ### security.inter.broker.protocol
 中等。broker之间内部通信使用的安全策略，默认为PLAINTEXT，不与inter.broker.listener.name同时设置
 
-### host.name
-已作废，Broker主机IP地址或域名
+### 中低等级待整理
 
-### port
-已作废，Broker端口
 
-### delete.topic.enable
-重要，默认true，如不允许通过admin工具删除topic，将其设置为false
+
+
+
+
+
 
 
 
