@@ -6,10 +6,52 @@ kafka：分布式流平台，非MQ
 依赖：zookeeper + jdk（scala是jdk开发）
 
 ## 核心概念
-1. topic：逻辑存在的一个概念，由多个partition组成
-2. partition：实际存储消息的单位——一个有序的队列，每个消息一个id，kafka保证partition内的消息按顺序被consumer消费，跨partition无法保证顺序
+### broker
+Kafka服务代理节点，如果一台主机仅部署一个kafka，一个主机为一个broker 
+多个broker构成了Kafka集群。
+
+### topic
+topic逻辑存在的一个概念，同一个topic可存在于多个broker；   
+topic可由一个或多个partition组成；   
+创建topic时可指定partition数量，也可在业务所需时修改partition数量，实现水平扩展。
+
+### partition
+实际存储消息的单位，一个partition只能属于一个topic；   
+partition是一个有序的队列，视为不断追加消息的日志文件，每个消息分配一个唯一的offset，用于记录其位置；   
+partition可以随topic一起跨多个broker存在；    
+partition以副本机制进行管理。
+
+#### partition replica机制
+同一编号的partition在不同broker内，包含相同的消息，多个包含相同消息的partition即为副本；   
+多个partition以一主多从结构存在，即单个leader、多个follower；   
+leader负责外部的读写，follower仅与leader同步；   
+绝对的相同时点，leader与follower并不能保证完全一致，因为同步过程需要时间；   
+leader所在的broker宕机，将从follower中选举新的leader，保证高可用；   
+AR（Assigned Replicas）：所有副本集合   
+ISR（In-sync Replicas）：保持一定同步的副本集合，ISR为AR的子集，该集合副本有资格被选举为leader     
+OSR（Out-of-sync Replicas）：滞后过多的副本集合，OSR为AR的子集，但正常情况为空    
+AR = ISR + OSR，leader负责跟踪和维护replica在ISR或OSR   
+
+#### partition中的变量
+LSO（LogStartOffset）:分区文件起始偏移量，即第一条消息所在的位置；   
+LEO(LogEndOffset):分区文件当前终止偏移量，即如果再产生一条消息时即将写入的位置；   
+HW（HighWatermark）:ISR副本分区中，最小的LogEndOffset的值，消费者消费时，仅能消费该offset以前的消息，不包括该位置；    
+  
+LEO、HW作为关键的存在，体现了partition同步的逻辑，即多副本之间在持续同步，而同步最慢的副本，制约着消费者可获取的消息数量。如：   
+生产者产生了10个消息：   
+leader：LEO=11   
+follower1：LEO=10   
+follower2：LEO=8   
+上述情况，leader的HW为8，消费者只能消费offset为：0-7的消息。follower2同步慢的情况，形成了该partition木桶的短板。同时，如果消息未在所有副本中完成同步，该消息将不被确认成功提交。     
+该机制通过性能换取了可靠性，保障任意broker宕机，新的follower被选举为leader后，无数据丢失，也无重复消费。
+
+### offset
+offset是partition中记录每条消息的偏移量，通过offset可顺序、唯一的获取消息；   
+offset有效范围在partition内，同主题下的多partition无法保证顺序性，即分区有序，主题内无法保证消费消息的顺序。
+
 3. producer：生产者，向broker发消息
-4. consumer：消费者，从broker取消息
+### consumer
+consumer以pull模式从broker获取消息，且保存消息位置（offset），宕机后通过消息位置继续拉取消息，确保消息不丢失；
 5. kafka broker：理解为一个kafka的服务节点，可包含多个topic，多个broker可组成cluster
 
 ## API

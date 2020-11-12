@@ -7,11 +7,22 @@
 ![](pic/03Configuration/brokerid.png)
 
 ### log.dirs
-必设参数，日志目录，默认tmp下   
+必设参数，日志目录，kafka把所有的消息都存在磁盘中，此参数指定存储位置，默认tmp下   
 ![](pic/03Configuration/log.dirs.png)
 
+### log.dir
+同log.dirs，优先级低于log.dirs
+
+### message.max.bytes
+接收消息的最大值，默认1000012b，如果大于此参数大小，则报RecordTooLargeException
+
 ### zookeeper.connect
-必设参数，kafka运行依赖zookeeper，多个zookeeper用逗号连接   
+必设参数，kafka运行依赖zookeeper，多个zookeeper用逗号连接  
+可增加chroot目录，如：
+```
+zookeeper.connect=127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002/kafka
+```
+chroot路径可使同一zookeeper被多套Kafka应用，服用zookeeper资源，不指定默认使用zookeeper根路径。
 ![](pic/03Configuration/zookeeper.png)
 
 ### advertised.host.name
@@ -62,8 +73,10 @@
 
 
 ### listeners
-重要，Broker监听，Broker间，Client与Broker间通信时，建立连接的关键信息，设置多个用逗号分隔。   
-格式：protocol://host:port,protocol2://host2:port2
+重要，Broker监听，Broker间，Client与Broker间通信时，建立连接的入口地址，设置多个用逗号分隔。   
+格式：protocol1://hostname1:port,protocol2://hostname2:port2   
+protocol为协议类型，支持：PLAINTEXT、SSL、SASL_SSL等。如未启用安全认证，使用PLAINTEXT即可；   
+hostname为主机名，不指定则绑定默认网卡，可能会指定到127.0.0.1，导致不能对外服务；如果主机名为0.0.0.0，表示绑定所有网卡。   
 ```
 listeners=PLAINTEXT://192.168.137.88:9092
 ```
