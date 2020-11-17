@@ -1,6 +1,7 @@
 package com.dce.kafka.sample.api.producer;
 
 import com.dce.kafka.sample.Cons;
+import com.dce.kafka.sample.interceptor.PrefixProducerInterceptor;
 
 import java.util.Properties;
 
@@ -21,6 +22,8 @@ public class ProducerConfig {
         properties.put(org.apache.kafka.clients.producer.ProducerConfig.BUFFER_MEMORY_CONFIG, "33554432");
         properties.put(org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, serializerKey);
         properties.put(org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, serializerValue);
+        // 配置拦截器，如果配置多个拦截器，多个类名拼成一个字符串，类间用逗号分隔
+        properties.put(org.apache.kafka.clients.producer.ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, PrefixProducerInterceptor.class.getName());
         return properties;
     }
 }

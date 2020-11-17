@@ -133,5 +133,90 @@ int partition(String var1, Object var2, byte[] var3, Object var4, byte[] var5, C
 2. 当key非null，则对key进行hash处理，通过hash值在所有分区中选择分区号，key值相同的消息，在分区数未调整的前提下，一定分配至同一分区  
 注：轮询方式只在可用分区中轮询，hash方式在所有分区中进行分配
 
-## 详细原理
+### 拦截器
+- 生产者、消费者均有各自的拦截器
+- 配置拦截器，拦截器不限于单个拦截器，可以多个拦截器构成拦截链，拦截链中某个拦截器异常，不影响下一拦截器执行
+```
+    // 配置拦截器，如果配置多个拦截器，多个类名拼成一个字符串，类间用逗号分隔
+    properties.put(org.apache.kafka.clients.producer.ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, PrefixProducerInterceptor.class.getName());
+```
+- 作用：发送前做前期准备工作，如修改消息；发送前的统计数据收集
+- 时机：拦截器->序列化->计算分区
+- 拦截器接口：
+```
+public interface ProducerInterceptor<K, V> extends Configurable {
+    // 发送前调用
+    ProducerRecord<K, V> onSend(ProducerRecord<K, V> var1);
+    // 应答前 或 返回异常前
+    void onAcknowledgement(RecordMetadata var1, Exception var2);
+    // 关闭前，回收资源
+    void close();
+}
+- 异常的处理：拦截器的几个方法在发生异常时，不抛出异常（一种合理的不传递异常的情况）
+```
+- 使用：为消息体增加前缀   
+```
+public class PrefixProducerInterceptor implements ProducerInterceptor<String, String>{
+    @Override
+    public ProducerRecord onSend(ProducerRecord<String, String> producerRecord) {
+        String prefixValue = "pre-" + producerRecord.value();
+        return new ProducerRecord<String, String>(producerRecord.topic(), producerRecord.partition(), producerRecord.timestamp(), producerRecord.key(), prefixValue);
+    }
+    ...
+}
+
+```
+
+![](pic/04Producer/interceptor.png)
+
+## Producer原理
+![](pic/04Producer/framework.png)
+Producer由两个主要线程构成：主线程、sender线程，前者组织消息，后者发送消息。   
+### 主线程
+- 处理流   
+1. KafkaProducer完成配置信息收集、构建ProducerRecord对象发出
+2. 拦截器对消息进行业务发出前的处理
+3. 序列化器将消息转为字节数组
+4. 分区器计算消息发往目标topic的partition
+5. RecordAccumulator负责积累持续而来的消息，构成ProducerBatch，批量发送给Sender线程处理 
+- 数据结构   
+RecordAccumulator->包括n个Deque<ProducerBatch>->包含多个ProducerBatch->包含多条ProducerRecord   
+ProducerRecord合并至ProducerBatch使字节（数据）更为紧凑，减少IO次数，提升吞吐量   
+- 缓存机制   
+消息在传输过程以字节数组存在，为了避免反复内存创建和释放，生产者内部有一个类似ByteBuffer缓存机制，当生产出的消息评估后，大小不超过batch.size设置参数值，该消息会生成ProducerBatch对象，且被复用，超过该大小，生成的ProducerBatch不会复用
+- 相关参数   
+1. buffer.memory RecordAccumulator存放消息的缓冲区大小，默认32M，如果目标分区较多，可调大参数，提升吞吐量
+2. max.block.ms 最大阻塞时间，默认600000ms 当生产者消息发送速度快于服务器接收速度时，将产生阻塞，阻塞超过该参数时间，则抛出异常
+3. batch.size ProducerBatch缓存大小，默认16KB。
+
+### Sender线程
+- 处理流   
+1. Sender发送前将数据保持至 InFlightRequests，结构为 Map<Node, Deque<Request>>，保存的目的为记录已发往broker节点，但未收到响应的消息
+2. 如果Deque<Request>的size与max.in.flight.requests.per.connection值一致，证明目标节点消息处理堆积，则不能再向该连接发送消息
+3. 当有响应消息，则清理连接中的消息，通知主线程RecordAccumulator清理
+- 数据结构   
+Sender线程从RecordAccumulator获取缓存消息后：   
+<分区, Deque<ProducerBatch>> 转化为 <Node, List<ProducerBatch>>， Node为broker节点   
+<Node, List<ProducerBatch>>  转化为 <Node, Request>，Request为ProducerRequest类   
+- 相关参数   
+1. max.in.flight.requests.per.connection InFlightRequests中每个连接最多缓存多少个未响应的请求，默认值5
+
+## 元数据同步
+- 集群元数据作用   
+让生产者知晓目标topic分区情况，包括分区的replica情况，分区leader所在的broker情况，replica情况等等，知晓以上情况，分区器方可进行消息分区的计算及发送
+- 更新元数据时机   
+1. 需要使用元数据时，客户端不存在所需的元数据，则会主动进行更新
+2. 超过metadata.max.age.ms参数设定的时间，则定时进行同步更新
+- 相关参数    
+1. metadata.max.age.ms 元数据同步的时间间隔
+
+## 其他重要参数
+1. acks
+指定分区中必须要有多少个副本收到消息，生产者才认为消息是发送成功的   
+- 1 默认值，只要分区的leader副本收到消息，服务端就产生成功响应，此设置为可靠性与吞吐量的折中   
+- 0 发出后，不待响应，最大吞吐量方案，无法保证可靠性
+- -1 或 all, 所有ISR中的副本都收到消息，服务端才生成成功响应，为最强可靠性，但如果只有一个leader副本，则与设置为1无差异，可以结合min.insync.replicas参数确保最小的副本数
+
+
+
 

@@ -1,7 +1,6 @@
 package com.dce.kafka.sample.api.producer;
 
 import com.dce.kafka.sample.Cons;
-import com.dce.kafka.sample.api.admin.AdminClientFactory;
 import org.apache.kafka.clients.producer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
