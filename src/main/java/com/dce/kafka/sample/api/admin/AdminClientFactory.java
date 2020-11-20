@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
-import static com.dce.kafka.sample.Cons.host_port;
+import static com.dce.kafka.sample.Cons.HOST_PORT;
 
 /**
  * 获取AdminClient
@@ -20,8 +20,8 @@ public class AdminClientFactory {
      */
     public static AdminClient getAdminClient() {
         Properties properties = new Properties();
-        properties.setProperty(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, host_port);
-        LOGGER.info("============================getAdminClient from " + host_port + "====================================");
+        properties.setProperty(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, HOST_PORT);
+        LOGGER.info("============================getAdminClient from " + HOST_PORT + "====================================");
         return AdminClient.create(properties);
     }
 

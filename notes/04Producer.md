@@ -22,7 +22,7 @@
 3. client.id：客户端id，如设定亦可，Producer会自动生成
 4. retries：对于可重试的异常，允许的重试次数，默认为0。异常如：网络异常、leader不可用等短时间可恢复的异常场景
 5. Producer参数较多，可通过org.apache.kafka.clients.producer.ProducerConfig中的常量来避免书写错误。   
-6. 序列化、反序列化的class全名也较易出错，可以将"org.apache.kafka.common.serialization.StringSerializer"替换为
+6. 序列化、反序列化的class全名也较易出错，可以将"org.apache.kafka.common.serialization.StringSerializer"替换为XxxClass.class.getName()
 
 - 生产者发送消息——异步发送（async）
 ```

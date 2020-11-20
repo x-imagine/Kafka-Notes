@@ -10,10 +10,10 @@ import java.util.Properties;
  *
  * @anthor lcl
  */
-public class ProducerConfig {
+public class PdcConfig {
     public static Properties initConfig(String serializerKey, String serializerValue) {
         Properties properties = new Properties();
-        properties.put(org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, Cons.host_port);
+        properties.put(org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, Cons.HOST_PORT);
         properties.put(org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG, "all");
         properties.put(org.apache.kafka.clients.producer.ProducerConfig.RETRIES_CONFIG, "3");
         properties.put(org.apache.kafka.clients.producer.ProducerConfig.CLIENT_ID_CONFIG, "producer-1");

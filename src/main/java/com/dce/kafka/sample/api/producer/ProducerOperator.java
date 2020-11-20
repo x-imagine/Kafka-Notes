@@ -16,7 +16,7 @@ public class ProducerOperator {
      * producer异步发送
      */
     public static void producerSend() {
-        Properties properties = ProducerConfig.initConfig(Cons.STRING_SERIALIZER_KEY, Cons.STRING_SERIALIZER_VALUE);
+        Properties properties = PdcConfig.initConfig(Cons.STRING_SERIALIZER_KEY, Cons.STRING_SERIALIZER_VALUE);
         Producer<String, String> producer = new KafkaProducer<>(properties);
         // send10条记录
         for (int i = 0; i < 10; i++) {
@@ -30,7 +30,7 @@ public class ProducerOperator {
      * producer异步发送（优化）
      */
     public static void producerSendGrace() {
-        Properties properties = ProducerConfig.initConfig(Cons.STRING_SERIALIZER_KEY, Cons.STRING_SERIALIZER_VALUE);
+        Properties properties = PdcConfig.initConfig(Cons.STRING_SERIALIZER_KEY, Cons.STRING_SERIALIZER_VALUE);
         Producer<String, String> producer = new KafkaProducer<>(properties);
         // send10条记录
         for (int i = 0; i < 10; i++) {
@@ -53,11 +53,11 @@ public class ProducerOperator {
      * producer异步阻塞发送
      */
     public static void producerSyncSend() throws ExecutionException, InterruptedException {
-        Properties properties = ProducerConfig.initConfig(Cons.STRING_SERIALIZER_KEY, Cons.STRING_SERIALIZER_VALUE);
+        Properties properties = PdcConfig.initConfig(Cons.STRING_SERIALIZER_KEY, Cons.STRING_SERIALIZER_VALUE);
         Producer<String, String> producer = new KafkaProducer<>(properties);
         // send10条记录
         for (int i = 0; i < 10; i++) {
-            ProducerRecord<String, String> producerRecord = new ProducerRecord<>(Cons.TEST_TOPIC_NAME_ONE_PARTITION, "key" + i, "record" + i);
+            ProducerRecord<String, String> producerRecord = new ProducerRecord<>(Cons.TEST_TOPIC_NAME_MUTI_PARTITION, "key" + i, "record" + i);
             Future<RecordMetadata> future = producer.send(producerRecord);
             long offset = future.get().offset();
             int partition = future.get().partition();

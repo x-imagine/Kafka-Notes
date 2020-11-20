@@ -5,7 +5,7 @@ package com.dce.kafka.sample;
  */
 public class Cons {
     // kafka server ip:port
-    final public static String host_port = "192.168.137.88:9092";
+    final public static String HOST_PORT = "192.168.137.88:9092";
 
     final public static String TEST_TOPIC_NAME_MUTI_PARTITION = "topic-a";
     final public static String TEST_TOPIC_NAME_ONE_PARTITION = "book-topic";
