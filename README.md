@@ -6,8 +6,10 @@
 ## Quick Start
 - [Quick Start](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/01QuickStart.md)
 
-## APIS
-- [Admin API](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/02AdminClientAPI.md)
+## USE
+- [AdminClient](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/02AdminClient.md)
+- [Producer](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/04Producer.md)
+- [Consumer](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/05Consumer.md)
 
 ## Configuration
 - [Configuration](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/03Configuration.md)
