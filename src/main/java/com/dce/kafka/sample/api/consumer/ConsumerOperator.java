@@ -26,9 +26,11 @@ public class ConsumerOperator {
         // consumerNotAutoCommit();
         // consumerCommitBypartition();
         // consumerCommitBySomePartition();
-
-        getPartitionInfo();
+        // getPartitionInfo();
+        // consumerUnsubscribe();
+        consumerBypartition();
     }
+
 
     /**
      * 自动提交（不推荐的方式）
@@ -48,7 +50,7 @@ public class ConsumerOperator {
     }
 
     /**
-     * 指定分区的消费
+     * 订阅指定分区的消费
      */
     public static void consumerAssignPartition() {
         TopicPartition topicPartition1 = new TopicPartition(TEST_TOPIC_NAME_MUTI_PARTITION, 0);
@@ -68,10 +70,28 @@ public class ConsumerOperator {
     }
 
     /**
-     * 代码逻辑提交
+     * 按partition处理
+     */
+    public static void consumerBypartition() {
+        Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
+        kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
+        while (true) {
+            ConsumerRecords<String, String> pollRecords = kafkaConsumer.poll(Duration.ofMillis(10000));
+            Set<TopicPartition> partitions = pollRecords.partitions();
+            for (TopicPartition partition : partitions) {
+                List<ConsumerRecord<String, String>> partitionRecords = pollRecords.records(partition);
+                for (ConsumerRecord<String, String> pollRecord : partitionRecords) {
+                    LOGGER.info("---------- partition" + pollRecord.partition() + ",offset " + pollRecord.offset() + ",key " + pollRecord.key() + ",value " + pollRecord.value());
+                }
+            }
+        }
+    }
+
+    /**
+     * 手工提交_同步、异步提交
      */
     public static void consumerNotAutoCommit() {
-
         Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
 
@@ -83,8 +103,9 @@ public class ConsumerOperator {
             for (ConsumerRecord<String, String> pollRecord : pollRecords) {
                 LOGGER.info("---------- partition" + pollRecord.partition() + ",offset " + pollRecord.offset() + ",key " + pollRecord.key() + ",value " + pollRecord.value());
             }
-            // 可处理为业务处理成功提交，否则不提交，确保下次仍能获得该消息
+            // 可处理为业务处理成功提交，否则不提交，确保下次仍能获得该消息。commitAsync异步提交，commitSync同步
             kafkaConsumer.commitAsync();
+            kafkaConsumer.commitSync();
         }
     }
 
@@ -160,5 +181,21 @@ public class ConsumerOperator {
             TopicPartition topicPartition = new TopicPartition(partitionInfo.topic(), partitionInfo.partition());
             LOGGER.info(topicPartition.toString());
         }
+    }
+
+    /**
+     * 取消订阅
+     */
+    public static void consumerUnsubscribe() {
+        // 定义配置信息
+        Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
+        // 订阅主题，可多个
+        kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
+        // 下面三种方式均达到取消订阅效果
+        kafkaConsumer.unsubscribe();
+        kafkaConsumer.subscribe(new ArrayList<>());
+        kafkaConsumer.assign(new ArrayList<>());
+        kafkaConsumer.poll(Duration.ofMillis(10000));
     }
 }
