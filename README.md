@@ -1,10 +1,9 @@
 # Kafka-Notes
 
-## Introduction
-- [Introduction](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/00Introduction.md)
-
 ## Quick Start
-- [Quick Start](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/01QuickStart.md)
+- [OS & Software Enviroment](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/01_01Enviroment.md)
+- [Basic Operation](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/01_02Basic_Operation.md)
+- [Introduction](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/00Introduction.md)
 
 ## USING
 - [AdminClient](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/02AdminClient.md)
