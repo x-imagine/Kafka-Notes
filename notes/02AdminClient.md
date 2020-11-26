@@ -1,5 +1,5 @@
-# 工程构建
-1. maven工程，pom.xml引入依赖
+# 一、工程构建
+- maven工程，pom.xml引入依赖
 ```
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -12,7 +12,7 @@
             <version>2.6.0</version>
         </dependency>
 ```
-2. logback-test.xml
+- logback-test.xml   
 过滤掉过多日志
 ```
 <?xml version="1.0" encoding="UTF-8"?>
@@ -30,12 +30,12 @@
     </root>
 </configuration>
 ```
-# AdminClientAPI
-## 用途
+# 二、 AdminClientAPI
+## 1.用途
 Kafka管理客户端API，实现topic、broker等各类对象的管理。
 对应源码包：com.dce.kafka.sample.api.admin
 
-## 获得AdminClient
+## 2.获得AdminClient
 对kafka任何对象的管理，均需要首先获取AdminClient。
 ```
     /**
@@ -52,7 +52,7 @@ Kafka管理客户端API，实现topic、broker等各类对象的管理。
 1. AdminClient.create()接受Properties、Map作为入参，结果一致；
 2. AdminClientConfig包括需要配置的各类属性常量，避免变量拼错。
 
-## Topic操作
+## 3.Topic操作
 ### 创建
 ```
     /**

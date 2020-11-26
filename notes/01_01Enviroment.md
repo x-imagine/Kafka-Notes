@@ -1,11 +1,11 @@
 # 系统及软件环境
-## 系统环境及运行版本
+## 一、系统环境及运行版本
 - OS版本：CentOS7+
 - JDK：1.8+
 - Kafka：kafka_2.13-2.6.0
 - zookeeper：zookeeper-3.6.2
-## 环境构建
-### JDK
+## 二、环境构建
+### 1.JDK
 - 下载jdk-8u121-linux-x64.tar.gz至服务器
 - 解压
 ```
@@ -27,7 +27,7 @@ source ~/.bash_profile
 ```
 ![](pic/01QuickStart/jdk.png)
 
-### zookeeper
+### 2.zookeeper
 - 解压、设置环境变量（同上）   
 ![](pic/01QuickStart/zookeeper0.png)
 ![](pic/01QuickStart/zookeeper1.png)
@@ -36,7 +36,7 @@ source ~/.bash_profile
 - 启动zookeeper   
 ![](pic/01QuickStart/zookeeper2.png)
 
-### Kafka
+### 3.Kafka
 - 直接解压，启动
 quickstart过程单机通过控制台本机实验，暂不修改配置文件
 ```

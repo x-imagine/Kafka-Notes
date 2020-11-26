@@ -1,6 +1,7 @@
 package com.dce.kafka.sample.api.producer;
 
 import com.dce.kafka.sample.Cons;
+import com.dce.kafka.sample.api.consumer.ConsumerOperator;
 import org.apache.kafka.clients.producer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,5 +70,6 @@ public class ProducerOperator {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         // producerSend();
         producerSyncSend();
+        // ConsumerOperator.isRunning.set(false);
     }
 }

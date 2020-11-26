@@ -1,6 +1,6 @@
 # Producer
-## 客户端开发
-### 代码示例
+## 一、客户端开发
+### 1.代码示例
 - Producer客户端配置信息
 ```
     public static Properties initConfig(String serializerKey, String serializerValue) {
@@ -96,7 +96,7 @@
 3. Producer<String, String>泛型代表消息对象中的key、value类型
 4. 异常：Producer中有两类异常：分为可重试异常、不可重试异常。可短暂恢复的为可重试，如NetworkException、LeaderNotAvailableException、UnkownTopicOrPartitionException等。可在Properties对象中设置重试次数，默认该次数为0
 
-### 消息对象——ProducerRecord
+### 2.消息对象——ProducerRecord
 对象包含多个属性：
 ```
 public class ProducerRecord<K, V> {
@@ -116,13 +116,13 @@ public class ProducerRecord<K, V> {
 - value：要发的消息，null的话代表墓碑消息
 - timestamp：分为创建时间、追加时间
 
-### 序列化
+### 3.序列化
 - 序列化器：生产者一端，将消息对象转化为字节数组
 - 反序列化器：消费者一端，将字节数组恢复为消息对象
 - 序列化器实现org.apache.kafka.common.serialization.Serializer接口，可以自定义序列化、反序列化类进行序列化处理
 - 客户端提供部分基础数据类型的序列化处理类，若不能满足可引入protobuf、protostuff、json等序列化器
 
-### 分区器
+### 3.分区器
 消息序列化后，需要发往topic的对应分区，若ProducerRecord中指定了分区，则发往指定分区，否则需要通过分区器选择分区。   
 - 分区器实现org.apache.kafka.clients.producer.Partitioner接口，partition方法负责返回分区号，如自定义则重写该方法   
 ```
@@ -133,7 +133,7 @@ int partition(String var1, Object var2, byte[] var3, Object var4, byte[] var5, C
 2. 当key非null，则对key进行hash处理，通过hash值在所有分区中选择分区号，key值相同的消息，在分区数未调整的前提下，一定分配至同一分区  
 注：轮询方式只在可用分区中轮询，hash方式在所有分区中进行分配
 
-### 拦截器
+### 4.拦截器
 - 生产者、消费者均有各自的拦截器
 - 配置拦截器，拦截器不限于单个拦截器，可以多个拦截器构成拦截链，拦截链中某个拦截器异常，不影响下一拦截器执行
 ```
@@ -169,10 +169,10 @@ public class PrefixProducerInterceptor implements ProducerInterceptor<String, St
 
 ![](pic/04Producer/interceptor.png)
 
-## Producer原理
+## 二、Producer原理
 ![](pic/04Producer/framework.png)
 Producer由两个主要线程构成：主线程、sender线程，前者组织消息，后者发送消息。   
-### 主线程
+### 1.主线程
 - 处理流   
 1. KafkaProducer完成配置信息收集、构建ProducerRecord对象发出
 2. 拦截器对消息进行业务发出前的处理
@@ -189,7 +189,7 @@ ProducerRecord合并至ProducerBatch使字节（数据）更为紧凑，减少IO
 2. max.block.ms 最大阻塞时间，默认600000ms 当生产者消息发送速度快于服务器接收速度时，将产生阻塞，阻塞超过该参数时间，则抛出异常
 3. batch.size ProducerBatch缓存大小，默认16KB。
 
-### Sender线程
+### 2.Sender线程
 - 处理流   
 1. Sender发送前将数据保持至 InFlightRequests，结构为 Map<Node, Deque<Request>>，保存的目的为记录已发往broker节点，但未收到响应的消息
 2. 如果Deque<Request>的size与max.in.flight.requests.per.connection值一致，证明目标节点消息处理堆积，则不能再向该连接发送消息
@@ -201,7 +201,7 @@ Sender线程从RecordAccumulator获取缓存消息后：
 - 相关参数   
 1. max.in.flight.requests.per.connection InFlightRequests中每个连接最多缓存多少个未响应的请求，默认值5
 
-## 元数据同步
+## 三、元数据同步
 - 集群元数据作用   
 让生产者知晓目标topic分区情况，包括分区的replica情况，分区leader所在的broker情况，replica情况等等，知晓以上情况，分区器方可进行消息分区的计算及发送
 - 更新元数据时机   
@@ -210,7 +210,7 @@ Sender线程从RecordAccumulator获取缓存消息后：
 - 相关参数    
 1. metadata.max.age.ms 元数据同步的时间间隔
 
-## 其他重要参数
+## 四、其他重要参数
 1. acks
 指定分区中必须要有多少个副本收到消息，生产者才认为消息是发送成功的   
 - 1 默认值，只要分区的leader副本收到消息，服务端就产生成功响应，此设置为可靠性与吞吐量的折中   

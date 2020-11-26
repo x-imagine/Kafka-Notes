@@ -1,6 +1,7 @@
 package com.dce.kafka.sample.api.consumer;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.dce.kafka.sample.Cons.TEST_TOPIC_NAME_MUTI_PARTITION;
 
@@ -20,7 +22,10 @@ import static com.dce.kafka.sample.Cons.TEST_TOPIC_NAME_MUTI_PARTITION;
  */
 public class ConsumerOperator {
     private final static Logger LOGGER = LoggerFactory.getLogger(ConsumerOperator.class);
-    public static void main(String[] args) {
+
+    private static final AtomicBoolean isRunning = new AtomicBoolean(true);
+
+    public static void main(String[] args) throws InterruptedException {
         // consumerAutoCommit();
         // consumerAssignPartition();
         // consumerNotAutoCommit();
@@ -28,8 +33,12 @@ public class ConsumerOperator {
         // consumerCommitBySomePartition();
         // getPartitionInfo();
         // consumerUnsubscribe();
-        consumerBypartition();
+        // consumerBypartition();
+        // consumerPause();
+        // consumerResume();
+        consumerBreakWhile();
     }
+
 
 
     /**
@@ -197,5 +206,64 @@ public class ConsumerOperator {
         kafkaConsumer.subscribe(new ArrayList<>());
         kafkaConsumer.assign(new ArrayList<>());
         kafkaConsumer.poll(Duration.ofMillis(10000));
+    }
+
+    /**
+     * 暂停消费
+     */
+    public static void consumerPause() {
+        Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
+        kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
+        while (isRunning.get()) {
+            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(1000));
+            for (ConsumerRecord<String, String> pollRecord : records) {
+                LOGGER.info("consumer partition" + pollRecord.partition() + ",offset " + pollRecord.offset() + ",key " + pollRecord.key() + ",value " + pollRecord.value());
+               // 消费1条之后就暂停消费
+                kafkaConsumer.pause(Sets.newHashSet(new TopicPartition(pollRecord.topic(), pollRecord.partition())));
+            }
+            LOGGER.info("当前暂停消费分区数：" + kafkaConsumer.paused().size());
+        }
+    }
+
+    /**
+     * 暂停、恢复消费
+     */
+    public static void consumerResume() {
+        Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
+        kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
+        while (isRunning.get()) {
+            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(1000));
+            for (ConsumerRecord<String, String> pollRecord : records) {
+                // 暂停消费
+                kafkaConsumer.pause(Sets.newHashSet(new TopicPartition(pollRecord.topic(), pollRecord.partition())));
+                // 恢复
+                kafkaConsumer.resume(Sets.newHashSet(new TopicPartition(pollRecord.topic(), pollRecord.partition())));
+                LOGGER.info("consumer partition" + pollRecord.partition() + ",offset " + pollRecord.offset() + ",key " + pollRecord.key() + ",value " + pollRecord.value());
+            }
+            LOGGER.info("当前暂停消费分区数：" + kafkaConsumer.paused().size());
+        }
+    }
+
+    /**
+     * 跳出消费循环
+     */
+    public static void consumerBreakWhile() {
+        // 测试用，超过10次拉取空集合，则退出循环终止消费
+        int emptyTimes = 10;
+        Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
+        kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
+        while (isRunning.get()) {
+            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(1000));
+            // 超过固定次数空集合，不再循环
+            if (records.isEmpty()) {
+                if ((--emptyTimes) == 0)
+                    // isRunning.set(false);
+                    kafkaConsumer.wakeup();
+            }
+            LOGGER.info("count down:" + emptyTimes);
+        }
     }
 }

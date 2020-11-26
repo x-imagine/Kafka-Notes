@@ -11,4 +11,4 @@ systemctl stop firewalld.service
 systemctl disable firewalld.service
 ```
 
-3. auto.leader.rebalance.enable中的leader rebalance指的是什么平衡？
+3. 消息在kafka中存储的时间

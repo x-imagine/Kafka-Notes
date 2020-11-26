@@ -1,6 +1,6 @@
 # Consumer
-## 客户端开发
-### 代码示例
+## 一、客户端开发
+### 1.代码示例
 - Producer客户端配置信息
 ```
     public static Properties initConfig(String deserializerKey, String deserializerValue) {
@@ -135,15 +135,15 @@
 unsubscribe和订阅一个空的效果等同，在未做任何订阅的情况下，拉去消息，会产生如下异常   
 ![](pic/05Consumer/unsubscribe_exception.png)
 
-### subscribe & assign
+### 2.subscribe & assign
 - subscribe方法订阅的主题，多个消费者的情况下，具备rebalance功能，根据消费者数量动态调整消费者与分区关系
 - assign 指定主题分区的不具备自动均衡处理（assgin方法无ConsumerRebalanceListener类）
 
-### 反序列化
+### 3.反序列化
 - 反序列化类与序列化类相互对应
 - 可以自定义序列化、反序列化，但建议不采用自定义，增加生产者、消费者间的耦合性
 
-### 消息消费
+### 4.消息消费
 1. 常规获取消息方式包括：推送，服务端将消息推送至客户端；拉取，客户端发起请求从服务端获取；
 2. kafka采用拉方式消费消息（poll）
 3. poll(Duraion)方法中的阻塞时间参数的设置，考虑响应速率的要求来设置，需要注意该时间包括了rebalance、获取消息等行为的耗时   
@@ -173,7 +173,7 @@ public class ConsumerRecord<K, V> {
     ...
 }
 ```
-### offset
+### 5.offset
 - kafka分区中通过offset作为分区消息的“偏移量”
 - 在consumer端offset作为消费者消费的“位移”
 - 消费位移以持久化方式存储于kafka内部主题__consumer_offsets中，并持久化，避免丢失
@@ -181,7 +181,7 @@ public class ConsumerRecord<K, V> {
 - offset处理不当可能导致重复消费，即消费一半，未提交同步，程序宕掉，重新拉起，刚刚消费掉的消息重复消费；消息丢失，即未消费的消息已经提交同步，但宕掉，重新拉起，遗失了宕前未消费部分
 - 提交模式：自动（系统默认）、手动（enable.auto.commit设置为false）
 
-### consumer手动提交
+### 6.consumer手动提交
 ```
     public static void consumerNotAutoCommit() {
         Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
@@ -215,5 +215,84 @@ public class ConsumerRecord<K, V> {
     public void commitAsync(Map<TopicPartition, OffsetAndMetadata> offsets, OffsetCommitCallback callback)
 ```
 注：异步方法在某次执行出错后，可采用重试机制，重试程序可能将后续提交的偏移量改小，导致重复消费   
-如：第1次提交10，失败，准备2秒后重试，1秒后第2次提交了20，第一次重试成功，将20覆盖为10，后续再拉取，将产生重复消费   
+如：第1次提交10，失败，准备2秒后重试，1秒后又有第2次提交了20的操作，2秒后第一次重试成功，又将20覆盖为10，后续再拉取，将产生重复消费   
 解决方法：在重试时，比较要重复提交的偏移量与最近的偏移量，如果已经小于最近偏移量，则不用再重试，说明后续的同步流程已经更新偏移量为较大值。或者，不建立重试机制，依赖后续的同步完成出错的同步
+- 在正常的退出或者rebalance前，需要在finally块完成同步动作
+
+### 7.控制消费
+可以在某种条件下，自行控制对某主题、分区的消费。   
+- 暂停消费
+```
+    private static final AtomicBoolean isRunning = new AtomicBoolean(true);
+    .....
+    public static void consumerPause() {
+        Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
+        kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
+        while (isRunning.get()) {
+            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(1000));
+            for (ConsumerRecord<String, String> pollRecord : records) {
+                LOGGER.info("consumer partition" + pollRecord.partition() + ",offset " + pollRecord.offset() + ",key " + pollRecord.key() + ",value " + pollRecord.value());
+               // 消费1条之后就暂停消费
+                kafkaConsumer.pause(Sets.newHashSet(new TopicPartition(pollRecord.topic(), pollRecord.partition())));
+            }
+            LOGGER.info("当前暂停消费分区数：" + kafkaConsumer.paused().size());
+        }
+    }
+```
+![](pic/05Consumer/pause_partition.png)
+如上，分区0、2、3、1陆续被暂停消费，暂停后的分区就不再有消费产生。  
+注：pause()方法需要在首次poll到partition后才能对该partition进行暂停，否则报 No current assignment for partition
+- 恢复消费
+``` java
+    // 暂停消费
+    kafkaConsumer.pause(Sets.newHashSet(new TopicPartition(pollRecord.topic(), pollRecord.partition())));
+    // 恢复
+    kafkaConsumer.resume(Sets.newHashSet(new TopicPartition(pollRecord.topic(), pollRecord.partition())));
+```
+resume() 方法将暂停的分区恢复消费
+- 退出消费while   
+方式一：通过isRunning.get()方式
+```
+    private static final AtomicBoolean isRunning = new AtomicBoolean(true);
+    public static void consumerBreakWhile() {
+        // 测试用，超过10次拉取空集合，则退出循环终止消费
+        int emptyTimes = 10;
+        Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
+        kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
+        while (isRunning.get()) {
+            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(1000));
+            // 超过固定次数空集合，不再循环
+            if (records.isEmpty()) {
+                if ((--emptyTimes) == 0)
+                    isRunning.set(false);
+            }
+            LOGGER.info("count down:" + emptyTimes);
+        }
+    }
+```
+![](pic/05Consumer/break_while.png)
+无生产者产生消息的情况下，10次空poll，通过isRunning.set(false)退出大循环   
+方式二：通过wakeup
+```
+    public static void consumerBreakWhile() {
+        // 测试用，超过10次拉取空集合，则退出循环终止消费
+        int emptyTimes = 10;
+        Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
+        kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
+        while (isRunning.get()) {
+            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(1000));
+            // 超过固定次数空集合，不再循环
+            if (records.isEmpty()) {
+                if ((--emptyTimes) == 0)
+                    // isRunning.set(false);
+                    kafkaConsumer.wakeup();
+            }
+            LOGGER.info("count down:" + emptyTimes);
+        }
+    }
+```
+![](pic/05Consumer/wakeup.png)
+注：wakeup()可以从其他线程安全调用；wakeup后将产生WakeupException，需要catch，但不用对该异常处理
