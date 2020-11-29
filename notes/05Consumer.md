@@ -219,7 +219,7 @@ public class ConsumerRecord<K, V> {
 解决方法：在重试时，比较要重复提交的偏移量与最近的偏移量，如果已经小于最近偏移量，则不用再重试，说明后续的同步流程已经更新偏移量为较大值。或者，不建立重试机制，依赖后续的同步完成出错的同步
 - 在正常的退出或者rebalance前，需要在finally块完成同步动作
 
-### 7.控制消费
+### 7.控制消费——暂停、恢复、跳出
 可以在某种条件下，自行控制对某主题、分区的消费。   
 - 暂停消费
 ```
@@ -284,7 +284,7 @@ resume() 方法将暂停的分区恢复消费
         kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
         while (isRunning.get()) {
             ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(1000));
-            // 超过固定次数空集合，不再循环
+            // 假设场景：取到超过次数的空集合，不再循环拉取
             if (records.isEmpty()) {
                 if ((--emptyTimes) == 0)
                     // isRunning.set(false);
@@ -296,3 +296,21 @@ resume() 方法将暂停的分区恢复消费
 ```
 ![](pic/05Consumer/wakeup.png)
 注：wakeup()可以从其他线程安全调用；wakeup后将产生WakeupException，需要catch，但不用对该异常处理
+
+### 8.指定消费偏移量（ offset ）
+#### 8.1 默认的offset获取
+存在几种情况，消费组无法获取offset信息
+- 新建消费组时，从未进行过消费，故无offset
+- 为消费组新分配主题时，从未进行消费，无offset
+- 消费组存在内部主题__consumer_offsets中的offset信息已超期，被清除后，无法获取offset
+- 消费者在seek指定的offset超过当前latest，则越界，无法获取offset
+
+获取不到offset时，consumer将读取auto.offset.reset参数，来指导自己offset的取值，auto.offset.reset取值
+- latest（默认） ：从所分配分区的最末尾开始消费
+- earliest ：从所分配分区的起始位置开始消费，起始位置为当前kafka中尚存在消息的低水位位置
+- none ：配置为none，则不取起始，不取末尾，抛出异常：NoOffsetForPartitionException
+- 为设置上述之一，则抛出ConfigException
+![](pic/05Consumer/auto_offset_reset.png)
+当采用默认情况下，consumer新创建后，先获取到分配的分区，并将offset初始指定到分区的最末尾
+#### 8.2 seek指定offset
+auto.offset.reset仅作用在无法获取offset情况，业务上需要灵活指定offset的场景需要使用seek()方法

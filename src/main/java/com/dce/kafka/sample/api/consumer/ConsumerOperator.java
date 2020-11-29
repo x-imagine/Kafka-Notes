@@ -257,13 +257,29 @@ public class ConsumerOperator {
         kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
         while (isRunning.get()) {
             ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(1000));
-            // 超过固定次数空集合，不再循环
+            // 假设场景：取到超过次数的空集合，不再循环拉取
             if (records.isEmpty()) {
                 if ((--emptyTimes) == 0)
                     // isRunning.set(false);
                     kafkaConsumer.wakeup();
             }
             LOGGER.info("count down:" + emptyTimes);
+        }
+    }
+
+    /**
+     * 指定offset消费
+     */
+    public static void consumerSeek() {
+        Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
+        kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
+        while (isRunning.get()) {
+            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(1000));
+            Set<TopicPartition> assignment = kafkaConsumer.assignment();
+            if (!assignment.isEmpty()) {
+                kafkaConsumer.seek();
+            }
         }
     }
 }
