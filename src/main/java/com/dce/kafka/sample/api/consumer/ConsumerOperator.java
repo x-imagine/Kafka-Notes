@@ -36,7 +36,8 @@ public class ConsumerOperator {
         // consumerBypartition();
         // consumerPause();
         // consumerResume();
-        consumerBreakWhile();
+        // consumerBreakWhile();
+        consumerSeek();
     }
 
 
@@ -274,11 +275,19 @@ public class ConsumerOperator {
         Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
         KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
         kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
+        Set<TopicPartition> topicPartitionSet = Sets.newHashSet();
+        // 需要先确保拉取到主题，才能进行seek，否则抛出No current assignment 异常
+        while (topicPartitionSet.isEmpty()) {
+            kafkaConsumer.poll(Duration.ofMillis(1000));
+            topicPartitionSet = kafkaConsumer.assignment();
+        }
+        for (TopicPartition topicPartition : topicPartitionSet) {
+            kafkaConsumer.seek(topicPartition, 0);
+        }
         while (isRunning.get()) {
-            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(1000));
-            Set<TopicPartition> assignment = kafkaConsumer.assignment();
-            if (!assignment.isEmpty()) {
-                kafkaConsumer.seek();
+        ConsumerRecords<String, String> pollRecords = kafkaConsumer.poll(Duration.ofMillis(1000));
+            for (ConsumerRecord<String, String> pollRecord : pollRecords) {
+                LOGGER.info("---------- partition" + pollRecord.partition() + ",offset " + pollRecord.offset() + ",key " + pollRecord.key() + ",value " + pollRecord.value());
             }
         }
     }

@@ -314,3 +314,69 @@ resume() 方法将暂停的分区恢复消费
 当采用默认情况下，consumer新创建后，先获取到分配的分区，并将offset初始指定到分区的最末尾
 #### 8.2 seek指定offset
 auto.offset.reset仅作用在无法获取offset情况，业务上需要灵活指定offset的场景需要使用seek()方法
+```
+    public static void consumerSeek() {
+        Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
+        kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
+        Set<TopicPartition> topicPartitionSet = Sets.newHashSet();
+        // 需要先确保拉取到主题，才能进行seek，否则抛出No current assignment 异常
+        while (topicPartitionSet.isEmpty()) {
+            kafkaConsumer.poll(Duration.ofMillis(1000));
+            topicPartitionSet = kafkaConsumer.assignment();
+        }
+        for (TopicPartition topicPartition : topicPartitionSet) {
+            kafkaConsumer.seek(topicPartition, 0);
+        }
+        while (isRunning.get()) {
+        ConsumerRecords<String, String> pollRecords = kafkaConsumer.poll(Duration.ofMillis(1000));
+            for (ConsumerRecord<String, String> pollRecord : pollRecords) {
+                LOGGER.info("---------- partition" + pollRecord.partition() + ",offset " + pollRecord.offset() + ",key " + pollRecord.key() + ",value " + pollRecord.value());
+            }
+        }
+    }
+```
+执行结果如下   
+![](pic/05Consumer/seek.png)   
+可以看到消费者客户端启动后，各partition的offset均指在最末端，紧接着seek将offset指向0位置，然后消费从0开始   
+seek方法用途较广，可用于kafka消息批量处理的原子性操作，如从offset=3000开始拉取100条数据，处理到51条后异常，则下次可以重新从3000拉取，避免重复消费   
+### 9.Rebalance（再平衡）
+#### 9.1概念   
+- 消费组中的不同消费者承担不同分区的消费任务，当消费者的任务进行调整时需要进行再平衡处理，再平衡为消费组的高可用和伸缩性提供保障；   
+- 再平衡期间，消费组内的消费者停止工作，不再读取消息；   
+- 分区被更换消费者后，在原消费组的状态会丢失，可能导致重复消费；
+- 应避免计划外、不必要的再平衡发生。
+#### 9.2ConsumerRebalanceListener（再均衡监听器）
+Consumer的subscribe方法支持传入再平衡监听   
+```
+    // 无再平衡监听的订阅
+    public void subscribe(Collection<String> topics) {
+        this.subscribe((Collection)topics, new NoOpConsumerRebalanceListener());
+    }
+    // 有再平衡监听的订阅
+    public void subscribe(Pattern pattern, ConsumerRebalanceListener listener) {
+        ...
+    }
+```
+ConsumerRebalanceListener接口包括
+```
+    // 消费者停止读取消息后，进行再平衡前执行
+    void onPartitionsRevoked(Collection<TopicPartition> var1);
+    // 消费者重新分配分区后，重新获取消息前执行
+    void onPartitionsAssigned(Collection<TopicPartition> var1);
+```
+- 可以在再平衡前，通过onPartitionsRevoked，进行offset的同步提交（commitSync），避免消息重复消费
+- 也可通过onPartitionsRevoked，将分区的offset持久化到db中，再次消费前通过onPartitionsAssigned获取分区的offset继续消费
+
+### 10.ConsumerInterceptor（消费者拦截器）
+- 消费者拦截器在消费到消息（poll方法返回之前）或者提交offset之后时触发拦截器，进行业务所需的操作；
+- 对应提供的接口为ConsumerInterceptor
+- 配置项：interceptor.classes
+- 拦截器异常不向上传递
+- 多个拦截器可建立拦截链
+```
+    // poll方法返回之前
+    ConsumerRecords<K, V> onConsume(ConsumerRecords<K, V> var1);
+    // 提交offset之后
+    void onCommit(Map<TopicPartition, OffsetAndMetadata> var1);
+```
