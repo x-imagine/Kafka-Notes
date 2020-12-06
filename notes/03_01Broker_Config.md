@@ -83,11 +83,14 @@ listener.security.protocol.map=PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_P
 ### security.inter.broker.protocol
 中等。broker之间内部通信使用的安全策略，默认为PLAINTEXT，不与inter.broker.listener.name同时设置
 
-### 中低等级待整理
-
 ### num.network.threads
 重要，Broker在网络间接收\发送消息的线程数，int，默认3
 
 ### num.io.threads
 重要，Broker在进行磁盘IO处理的线程数，int，默认8
 
+### broker.rack
+字符串，默认为null
+- kafka支持在broker节点设置机架信息，指定机架后kafka在分区副本分配时，会尽量让副本不在同一机架的broker上，避免同一机架故障导致多副本失效
+- 机架信息在kafka集群中要么全不设置，要么全都设置，仅设置部分broker的机架信息，则会报AdminOperationException
+- 可以通过--disable-rack-aware来忽略broker.rack参数
