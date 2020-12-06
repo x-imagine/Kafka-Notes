@@ -9,7 +9,7 @@
 - [AdminClient](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/02AdminClient.md)
 - [Producer](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/04Producer.md)
 - [Consumer](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/05Consumer.md)
-- [Topic & Partition](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/06Topic & Partition.md)
+- [Topic & Partition](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/06Topic_And_Partition.md)
 - Log
 - Server
 - Monitor
