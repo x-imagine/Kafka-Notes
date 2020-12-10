@@ -33,6 +33,12 @@ source ~/.bash_profile
 ![](pic/01QuickStart/zookeeper1.png)
 - 创建文件目录、配置   
 ![](pic/01QuickStart/zookeeper3.png)
+- 集群配置，增加多台服务器及通信端口、选举端口
+```
+server.0=192.168.137.88:2888:3888
+server.1=192.168.137.89:2888:3888
+server.2=192.168.137.90:2888:3888
+```
 - 启动zookeeper   
 ![](pic/01QuickStart/zookeeper2.png)
 

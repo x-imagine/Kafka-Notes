@@ -94,3 +94,6 @@ listener.security.protocol.map=PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_P
 - kafka支持在broker节点设置机架信息，指定机架后kafka在分区副本分配时，会尽量让副本不在同一机架的broker上，避免同一机架故障导致多副本失效
 - 机架信息在kafka集群中要么全不设置，要么全都设置，仅设置部分broker的机架信息，则会报AdminOperationException
 - 可以通过--disable-rack-aware来忽略broker.rack参数
+
+### num.partitions
+创建主题时，如不指定分区数量，默认创建的分区数，默认为1
