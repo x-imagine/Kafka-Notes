@@ -32,6 +32,7 @@ public class TopicOperator {
      */
     public static void topicList() throws ExecutionException, InterruptedException {
         AdminClient adminClient = AdminClientFactory.getAdminClient();
+        // 包含一个KafkaFuture，用于异步发送请求之后等待操作结果，支持链式调用以及其他异步编程模型
         ListTopicsResult listTopicsResult = adminClient.listTopics();
         LOGGER.info("--------------   topic size   -------------------- :" + listTopicsResult.names().get().size());
         listTopicsResult.names().get().stream().forEach(s -> {
@@ -39,7 +40,9 @@ public class TopicOperator {
         });
 
         ListTopicsOptions listTopicsOptions = new ListTopicsOptions();
+        // 是否需要内部Topic
         listTopicsOptions.listInternal(true);
+        // 包含timeoutMs这个成员变量，用来设定请求的超时时间
         listTopicsResult = adminClient.listTopics(listTopicsOptions);
         listTopicsResult.listings().get().stream().forEach(topic -> {
             LOGGER.info("--------------   topic list   -------------------- " + topic);
@@ -64,7 +67,7 @@ public class TopicOperator {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         String topicName = "book-topic";
-        TopicOperator.createTopic(topicName);
+        // TopicOperator.createTopic(topicName);
         TopicOperator.topicList();
         // TopicOperator.delTopic(topicName);
     }

@@ -24,12 +24,12 @@ kafka-topics.sh  --bootstrap-server 192.168.137.88:9092 --create --topic topic-n
 - 创建日志文件数量为：分区数 * 副本因子，如上例为 4 * 2 = 8 个分区文件
 - 每个副本对应一个日志文件
 - 副本默认平均分布在各个broker中，如上例命令，若broker为3个，则8个文件将以2:3:3的数量比例分布在不同broker中，如下：     
-![](pic/06Topic&Partition/replica.png) 
+![](pic/06Topics/replica.png) 
 4.可通过命令参数--replica-assignment指定不同分区的分配方案   
 ```
 kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --create --topic topic-name --replica-assignment 2:0,0:1,1:2,2:1
 ```
-![](pic/06Topic&Partition/replica_assignment.png)
+![](pic/06Topics/replica_assignment.png)
 使用--replica-assignment指定分区分配方案，就不必再使用--partitions 4 --replication-factor 2，因为“2:0,0:1,1:2,2:1”中已明确分区个数、副本分布情况
 
 - 不同分区用“,”间隔，如上为4个分区指定分配情况
@@ -61,25 +61,25 @@ kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --create --topic topic-na
 ```
 kafka-topics.sh --list --bootstrap-server 192.168.137.88:9092
 ```
-![](pic/06Topic&Partition/list_topic.png)
+![](pic/06Topics/list_topic.png)
 其中__开头的为kafka内置的主题
 2.查看指定主题--describe
 ```
 kafka-topics.sh --describe --topic topic-a,book-topic --bootstrap-server 192.168.137.88:9092
 ```
-![](pic/06Topic&Partition/describe_topics.png)
+![](pic/06Topics/describe_topics.png)
 3.查看覆盖配置的主题--topic-with-overrides
 如使用--config，覆盖了topic的默认配置，可通过--describe + --topic-with-overrides获取，返回内容只是--list的首行
 ```
 kafka-topics.sh --describe --bootstrap-server 192.168.137.88:9092 --topics-with-overrides
 ```
-![](pic/06Topic&Partition/overrides.png)
+![](pic/06Topics/overrides.png)
 
 4.查询有失效分区副本的主题 --under-replicated-partitions 
 ```
 kafka-topics.sh --describe --zookeeper 192.168.137.88:2181 --under-replicated-partitions 
 ```
-![](pic/06Topic&Partition/under-replication-partitions.png)   
+![](pic/06Topics/under-replication-partitions.png)   
 - 在3个节点的kafka集群创建了分区3、副本因子3的主题，然后--describe分区、副本分布正常
 - 停掉一个broker再查ISR中少了节点为0的副本信息，再使用--under-replicated-partitions查看，可以查到对应主题分区信息
 - 重启之前停掉的节点，再运行--under-replicated-partitions ，则不再有相关信息
@@ -98,20 +98,20 @@ kafka-topics.sh --describe --zookeeper 192.168.137.88:2181 --under-replicated-pa
 kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --alter --topic topic-config --partitions 4 
 ```
 
-![](pic/06Topic&Partition/alter_create.png)
+![](pic/06Topics/alter_create.png)
 增加分区数量：      
-![](pic/06Topic&Partition/alter_partitions.png)   
+![](pic/06Topics/alter_partitions.png)   
 - 当对分区数量修改是，如果原消息包含key值，则调整分区数量后原消息归属的分区逻辑将改变
 - 修改主题配置时，需要结合--config对配置信息进行修改
 ```
 kafka-topics.sh --zookeeper 192.168.137.88:2181 --alter --topic topic-config --partitions 6 --config segment.bytes=100000000
 ```
-![](pic/06Topic&Partition/alter_config.png)   
+![](pic/06Topics/alter_config.png)   
 - 删除主题配置，恢复默认配置时，需要结合--delete-config进行
 ```
 kafka-topics.sh --zookeeper 192.168.137.88:2181 --alter --topic topic-config --delete-config segment.bytes
 ```
-![](pic/06Topic&Partition/alter_delete_config.png)   
+![](pic/06Topics/alter_delete_config.png)   
 - 通过kafka-topics.sh已经标识为deprecated，官方更推荐使用kafka-configs.sh脚本进行处理
 
 ### 四、配置管理
@@ -126,6 +126,20 @@ kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --alter --entity-type to
 ```
 kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --describe --entity-type topics --entity-name topic-config
 ```
-![](pic/06Topic&Partition/kafka-config-add.png)   
+![](pic/06Topics/kafka-config-add.png)   
 - 通过kafka-configs.sh修改配置时，zookeeper会创建对应的节点存储修改的配置信息，待到查看时，就从该节点获取信息
-![](pic/06Topic&Partition/zkCli-topics.png)   
+![](pic/06Topics/zkCli-topics.png)   
+
+### 四、删除主题
+- kafka内部自带主题不可删除
+- 不存在的主题不可删除，删除时报IllegalArgumentException，通过 --if-exists来忽略此异常
+- 主题删除的本质是zookeeper中/admin/delete_topics/下创建了一个待删除节点，由kafka控制器读取节点最终完成主题删除；故也可以手工增加zookeeper节点来删除主题
+```
+kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --delete --topic topic-unkown --if-exists
+```
+![](pic/06Topics/delete-unknow.png)   
+- 主题删除的前提是delete.topic.enable=true，主题删除后不可逆
+```
+kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --delete --topic topic-config
+```
+![](pic/06Topics/delete-exists.png)   
