@@ -50,14 +50,16 @@ chroot路径可使同一zookeeper被多套Kafka应用，服用zookeeper资源，
 
 ### auto.leader.rebalance.enable
 重要，是否允许leader rebalance，默认true。若允许kafka controller开启一个后台进程   
-在leader.imbalance.check.interval.seconds所设置的时间频度内，在失衡百分比在leader.imbalance.per.broker.percentage所设置的比例以上时
+在leader.imbalance.check.interval.seconds所设置的时间频度内，在分区不平衡率在leader.imbalance.per.broker.percentage所设置的比例以上时
 进行leader重选举
+分区不平衡率 = 非优先副本个数 / 分区总数
+注：当某个分区的leader节点发生故障，将从follower节点中选举出新的leader节点，原有leader节点恢复工作后，并不会恢复leader节点身份，因此，当由于宕机或网络等原因导致leader节点聚集在某个broker时，会造成该节点负载过大，形成失衡
 
 ### leader.imbalance.check.interval.seconds
-重要，进行rebalance检查处理的时间频度参数，long，默认300
+重要，当auto.leader.rebalance.enable开关打开，进行rebalance检查处理的时间频度参数，long，默认300（5分钟）
 
 ### leader.imbalance.per.broker.percentage
-重要，允许broker的leader失衡的比例，默认10（%）
+重要，当auto.leader.rebalance.enable开关打开，允许broker的分区不平衡率大最大比率，默认10（%），超过此比率进行基于优先副本机制的rebalance处理
 
 ### port
 已作废，Broker端口

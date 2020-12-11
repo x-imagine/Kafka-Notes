@@ -40,6 +40,10 @@ server.1=192.168.137.89:2888:3888
 server.2=192.168.137.90:2888:3888
 ```
 - 启动zookeeper   
+```
+cd $ZK_HOME/bin
+./zkServer.sh start
+```
 ![](pic/01QuickStart/zookeeper2.png)
 
 ### 3.Kafka
@@ -49,3 +53,8 @@ quickstart过程单机通过控制台本机实验，暂不修改配置文件
 bin/kafka-server-start.sh config/server.properties
 ```
 ![](pic/01QuickStart/kafka0.png)
+- 集群部署配置调整   
+broker.id修改为不重复的值
+```
+zookeeper.connect=192.168.137.88:2181,192.168.137.89:2181,192.168.137.90:2181
+```

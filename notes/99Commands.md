@@ -57,6 +57,12 @@ kafka-topics.sh --zookeeper 192.168.137.88:2181 --alter --topic topic-config --p
 kafka-topics.sh --zookeeper 192.168.137.88:2181 --alter --topic topic-config --delete-config segment.bytes
 ```
 
+### 11.手动分区平衡处理
+```
+kafka-preferred-replica-election.sh --zookeeper 192.168.137.88:2181
+```
+注：脚本对全部主题重新分区平衡，成本较高；如果主题和分区过多，信息也可能占满zookeeper中的/admin/preferred-replica-election节点（默认1M），导致失败
+
 ## 二、Producer
 Producer参数说明：
 - --bootstrap-server 目标Kafka服务
