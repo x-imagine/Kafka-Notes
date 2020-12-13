@@ -28,8 +28,12 @@ kafka提供分区自动平衡功能，auto.leader.rebalance.enable（默认true�
 ```
 直接执行脚本，脚本将对所有的主题进行分区平衡处理，并将分区方案打印
 ![](pic/07Partitions/kafka-preferred-replica-election.png) 
-注：This tool is deprecated. Please use kafka-leader-election tool.
 - 问题：对全部主题重新分区平衡，成本较高；如果主题和分区过多，信息也可能占满zookeeper中的/admin/preferred-replica-election节点（默认1M），导致失败
+注：执行过程提示“This tool is deprecated. Please use kafka-leader-election tool.”，较高版本kafka可执行
+```
+kafka-leader-election.sh --bootstrap-server 192.168.137.88:9092 --all-topic-partitions --election-type PREFERRED
+```
+
 
 ### 3.手动分区平衡处理（指定分区副本方案）
 kafka-preferred-replica-election.sh追加path-to-json-file + json文件路径，可实现对自定义分区副本进行平衡处理
@@ -53,3 +57,7 @@ kafka-preferred-replica-election.sh追加path-to-json-file + json文件路径，
  kafka-preferred-replica-election.sh --zookeeper 192.168.137.88:2181 election-rule.json
 ```
 ![](pic/07Partitions/prefer-by-json-file.png) 
+注：执行过程提示“This tool is deprecated. Please use kafka-leader-election tool.”，较高版本kafka可执行
+```
+kafka-leader-election.sh --bootstrap-server 192.168.137.88:9092 --election-type PREFERRED --path-to-json-file election-rule.json
+```
