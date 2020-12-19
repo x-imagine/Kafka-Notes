@@ -92,6 +92,94 @@ kafka-leader-election.sh --bootstrap-server 192.168.137.88:9092 --all-topic-part
 ```
 kafka-leader-election.sh --bootstrap-server 192.168.137.88:9092 --election-type PREFERRED --path-to-json-file election-rule.json
 ```
+
+### 12.分区重分配处理
+- 定义重分配主题的json文件
+```
+{
+    "topics": [
+        {
+            "topic": "topic-reassign",
+            "partition": 0
+        }
+    ],  
+    "version":1
+}
+
+```
+- 根据上述json生成分配的配置方案
+```
+kafka-reassign-partitions.sh --bootstrap-server 192.168.137.88:9092 --generate --topics-to-move-json-file reassign-rule.json --broker-list 0,2
+```
+- 执行重分配   
+将重分配的方案创建json文件
+```json
+{
+    "version": 1, 
+    "partitions": [
+        {
+            "topic": "topic-reassign", 
+            "partition": 0, 
+            "replicas": [
+                2, 
+                0
+            ], 
+            "log_dirs": [
+                "any", 
+                "any"
+            ]
+        }, 
+        {
+            "topic": "topic-reassign", 
+            "partition": 1, 
+            "replicas": [
+                0, 
+                2
+            ], 
+            "log_dirs": [
+                "any", 
+                "any"
+            ]
+        }, 
+        {
+            "topic": "topic-reassign", 
+            "partition": 2, 
+            "replicas": [
+                2, 
+                0
+            ], 
+            "log_dirs": [
+                "any", 
+                "any"
+            ]
+        }
+    ]
+}
+```
+通过kafka-reassign-partitions.sh的--execute执行方案
+```
+kafka-reassign-partitions.sh --bootstrap-server 192.168.137.88:9092 --execute --reassignment-json-file reassign-execute.json
+```
+执行后，broker节点1已不再拥有该主题的分区
+
+### 复制限流 之 kafka-config.sh
+```
+kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --entity-type brokers --entity-name 1 --alter --add-config --follower.replication.thrott
+led.rate=1024,leader.replication.throttled.rate=1024
+```
+![](pic/07Partitions/config-throttle-broker.png) 
+关键参数：
+- --entity-type：指定修改类型为brokers
+- --entity-name：提供一个int型的broker id
+- --alter：需要修改broker配置
+- --add-config：修改类型为增加配置项
+- --follower.replication.throttled.rate=1024,leader.replication.throttled.rate=1024 增加内容及参数值
+
+### 取消复制限流
+```
+kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --entity-type brokers --entity-name 1 --alter --delete-config --follower.replication.throttled.rate,leader.replication.throttled.rate
+```
+
 ## 二、Producer
 Producer参数说明：
 - --bootstrap-server 目标Kafka服务

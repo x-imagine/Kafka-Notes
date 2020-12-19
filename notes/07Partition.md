@@ -61,3 +61,119 @@ kafka-preferred-replica-election.sh追加path-to-json-file + json文件路径，
 ```
 kafka-leader-election.sh --bootstrap-server 192.168.137.88:9092 --election-type PREFERRED --path-to-json-file election-rule.json
 ```
+ ## 二、分区再分配
+在主题和分区创建后，再在集群中新增broker，新增的节点不会承接老节点已有的主题分区；同时，若有broker需要下线，原有节点也不会自动调整。如有增减broker节点需要，则可通过kafka-reassign-partitions.sh进行重新分区处理
+![](pic/07Partitions/create-reaasign.png) 
+ 如把上图brokerId为1的节点下线，重新分区步骤：
+- 定义重分配主题的json文件
+```
+{
+    "topics": [
+        {
+            "topic": "topic-reassign",
+            "partition": 0
+        }
+    ],  
+    "version":1
+}
+
+```
+- 根据上述json生成分配的配置方案
+```
+kafka-reassign-partitions.sh --bootstrap-server 192.168.137.88:9092 --generate --topics-to-move-json-file reassign-rule.json --broker-list 0,2
+```
+![](pic/07Partitions/reaasign-json.png) 
+执行kafka-reassign-partitions.sh后生成两段json串：   
+前段为当前主题分区配置情况，用于备份，失败后可还原；
+后端为目标主题分区配置方案，需要保存为json文件，用于下一步执行；   
+注：此时根据规则生成方案json，并未执行
+- 执行重分配   
+将重分配的方案创建json文件
+```json
+{
+    "version": 1, 
+    "partitions": [
+        {
+            "topic": "topic-reassign", 
+            "partition": 0, 
+            "replicas": [
+                2, 
+                0
+            ], 
+            "log_dirs": [
+                "any", 
+                "any"
+            ]
+        }, 
+        {
+            "topic": "topic-reassign", 
+            "partition": 1, 
+            "replicas": [
+                0, 
+                2
+            ], 
+            "log_dirs": [
+                "any", 
+                "any"
+            ]
+        }, 
+        {
+            "topic": "topic-reassign", 
+            "partition": 2, 
+            "replicas": [
+                2, 
+                0
+            ], 
+            "log_dirs": [
+                "any", 
+                "any"
+            ]
+        }
+    ]
+}
+```
+通过kafka-reassign-partitions.sh的--execute执行方案
+```
+kafka-reassign-partitions.sh --bootstrap-server 192.168.137.88:9092 --execute --reassignment-json-file reassign-execute.json
+```
+执行后，broker节点1已不再拥有该主题的分区
+![](pic/07Partitions/reassign-execute.png) 
+重分配原理：
+1.kafka控制器为主题下的分区新增一个副本，需要临时增加副本因子；   
+2.将分区副本的leader节点数据复制到新的副本中；   
+3.将下线节点的旧副本清除，同时降低临副本因子。   
+注：在执重分配前，建议将预下线的broker节点关闭，使不再有分区的leader副本在预下线节点，减少处理过程的流量复制。
+
+## 三、复制限流
+重分配过程中，如果某分区数据量巨大，则复制数据会占用较大资源，可能影响业务的正常处理，避免资源抢占问题。   
+### 1.kafka-config.sh限流
+1.1 broker限流
+```
+kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --entity-type brokers --entity-name 1 --alter --add-config --follower.replication.thrott
+led.rate=1024,leader.replication.throttled.rate=1024
+```
+![](pic/07Partitions/config-throttle-broker.png)
+查看结果   
+```
+kafka-configs.sh --zookeeper 192.168.137.88:2181 --entity-type brokers --entity-name 1 --describe
+``` 
+![](pic/07Partitions/config-throttle-describe.png) 
+关键参数：
+- --entity-type：指定修改类型为brokers
+- --entity-name：提供一个int型的broker id
+- --alter：需要修改broker配置
+- --add-config：修改类型为增加配置项
+- --follower.replication.throttled.rate=1024,leader.replication.throttled.rate=1024 增加内容及参数值
+1.2取消限流
+```
+kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --entity-type brokers --entity-name 1 --alter --delete-config --follower.replication.throttled.rate,leader.replication.throttled.rate
+```
+![](pic/07Partitions/config-delete-throttle-broker.png) 
+1.2 topic限流   
+类似broker限流，主题级别同样通过kafka-configs.sh进行限流处理，不过在限流时需要制定leader分区、follower分区
+![](pic/07Partitions/config-throttle-topic-info.png) 
+
+```
+todo，主题限流暂存疑
+```
+## 四、副本因子调整
