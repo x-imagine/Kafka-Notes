@@ -16,4 +16,17 @@
 - 创建主题时，如果log目录指定了多个，那么log文件会在分区最少的那个目录创建本次任务的文件
 
 ## 二、日志格式
+早期版本——v0
+![](pic/08Log/v0.png) 
+- crc32（4B）：crc32校验值。校验范围为magic至value之间
+- magic（1B）：消息格式版本号，此版本的magic值为0
+- attributes（1B）：消息的属性。总共占1个字节，低3位表示压缩类型：0表示NONE、1表示GZIP、2表示SNAPPY、3表示LZ4（LZ4自Kafka 0.9.x引入），其余位保留
+- key length（4B）：表示消息的key的长度。如果为-1，则表示没有设置key，即key=null
+- key：可选，如果没有key则无此字段
+- value length（4B）：实际消息体的长度。如果为-1，则表示消息为空
+- value：消息体。可以为空，比如tomnstone消息
+早期版本——v1
+![](pic/08Log/v1.png) 
+升级版本——v2
+![](pic/08Log/v2.png) 
 
