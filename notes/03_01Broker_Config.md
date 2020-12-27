@@ -99,3 +99,20 @@ listener.security.protocol.map=PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_P
 
 ### num.partitions
 创建主题时，如不指定分区数量，默认创建的分区数，默认为1
+
+
+### log.index.interval.bytes
+由于kafka是稀疏索引，索引不会记录所有消息，通过此参数设置每定量消息产生一个索引项，默认4096，即4k
+
+### log.segment.bytes
+日志分段文件值大小，当超过此值，新建segment分段文件。默认1G
+
+### log.index.size.max.bytes
+索引文件的最大值，超过此值，则新建一个索引文件。默认10M
+索引文件一创建，就会创建一个此大小的索引文件，直到切分出新的索引文件，kafka才对该索引文件裁剪为实际大小
+
+### log.cleanup.policy
+log.cleanup.policy=delete\compact决定删除还是压缩。默认delete
+
+### log.retention.check.interval.ms
+通过log.retention.check.interval.ms配置检测是否需删除日志的周期 时间，默认5分钟
