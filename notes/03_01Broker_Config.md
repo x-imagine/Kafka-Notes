@@ -116,3 +116,10 @@ log.cleanup.policy=delete\compact决定删除还是压缩。默认delete
 
 ### log.retention.check.interval.ms
 通过log.retention.check.interval.ms配置检测是否需删除日志的周期 时间，默认5分钟
+
+### log.retention.hours \ log.retention.minutes \ log.retention.ms
+根据上述参数配置的日志保留时间，与日志分段最大的时间戳largestTimestamp对比，判断是否超过策略设置的清除时间，如超过，则删除   
+上述三个参数时间单位越小，优先级越高，log.retention.ms最高，log.retention.hours最低，默认log.retention.hours=168，即7天
+
+### file.delete.delay.ms
+删除日志延迟任务启动时间，默认1分钟
