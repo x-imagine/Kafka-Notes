@@ -123,3 +123,9 @@ log.cleanup.policy=delete\compact决定删除还是压缩。默认delete
 
 ### file.delete.delay.ms
 删除日志延迟任务启动时间，默认1分钟
+
+### broker.id.generation.enable & reserved.broker.max.id
+两个参数配合使用，自动生成kafka的brokerId   
+broker.id.generation.enable默认为false，即不自动生成，设置为true时，开启自动生成brokerId   
+自动生成brokerId有一个基准值，自动生成的id必须大于此基准，reserved.broker.max.id即为基准值，默认1000，则0-1000留给手动设置，1000以上为自动设置   
+
