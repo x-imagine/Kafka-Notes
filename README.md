@@ -13,6 +13,7 @@
 - [Partition](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/07Partition.md)
 - [Log](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/08Log.md)
 - [Server](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/09Server.md)
+- [Client](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/10Client.md)
 - Monitor
 
 ## Configuration
