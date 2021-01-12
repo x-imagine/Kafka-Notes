@@ -94,15 +94,21 @@ C2:CP0 CP1 CP2 (全都保持第一次分配不变)
 客户端将全部消费组分成多个子集，每个消费组的子集在服务端对应一个组协调器GroupCoordinator
 ### 流程
 当客户端新增消费者时，如下处理流程
-- 一阶段：连接服务端协调器阶段。   
+- 一阶段：连接服务端协调器阶段   
 消费者先找到其所在组对应的GroupCoordinator所在的broker，与其建立连接（寻找方式是根据消费组groupId的哈希值，逐步寻找消费组对应的分区leader的broker节点）
-- 二阶段：加入服务端协调器并选leader阶段，选分区策略。   
+- 二阶段：加入服务端协调器并选leader阶段，选分区策略   
 加入该消费组对应的组协调器GroupCoordinator，选举该消费组的leader（随机选），leader负责干活，干啥活？要选举一个分配策略出来   
 策略选举办法：   
 1.收集所有消费者支持的策略（即partition.assignment.strategy配置的1个或多个策略），形成候选人   
 2.每个消费者为自己的候选人投票，支持就+1   
 3.比较所有候选人票数，获票最多的胜出   
 异常：当选出的策略某个消费者不支持该策略，则报IllegalArgumentException：Member does not support protocol
-- 三阶段：同步策略结果，启动心跳任务阶段。   
+- 三阶段：同步策略结果，启动心跳任务阶段   
 leader将二阶段选举出的分配策略，通过GroupCoordinator同步给各个组内成员，完成信息同步后，开启心跳任务，消费者定时向GroupCoordinator发送心跳确定存活
-- 四阶段：心跳监控阶段。   
+- 四阶段：心跳监控阶段   
+心跳作为独立线程，在轮询消息空挡发送心跳，如果心跳在足够时间内未发出，视为消费者死亡，触发一次再均衡   
+心跳间隔参数：heartbeat.interval.ms，默认3000ms，其值不得超过session.timeout.ms的1/3   
+session.timeout.ms需在group.min.session.timeout.ms（6s）和group.max.session.timeout.ms（300s）之间，超过session.timeout.ms则触发再均衡   
+max.poll.interval.ms指定消费者组调用poll方法拉取消息的最大延迟，超过此时间，消费者被认为失败，触发再均衡   
+
+## __consumer_offsets

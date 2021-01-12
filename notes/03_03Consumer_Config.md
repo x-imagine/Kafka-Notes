@@ -92,8 +92,10 @@ consumer自动提交时，提交的时间间隔，默认5秒。生效前提为en
 通常情况该参数小于session.timeout.ms，不高于该值的三分之一
 默认值3000ms
 
-### session.timeout.ms
-检查消费者是否失效，无心跳达到超时时间视为失效，默认10000ms
+### session.timeout.ms & group.min.session.timeout.ms & group.max.session.timeout.ms
+检查消费者是否失效，无心跳达到超时时间视为失效，默认10000ms   
+session.timeout.ms需在group.min.session.timeout.ms（6s）和group.max.session.timeout.ms（300s）之间   
+若消费者心跳超过参数时间未送达，协调器认为消费者死亡   
 
 ### max.poll.intervals.ms
 消费组管理消费者时，消费者拉取消息的最大间隔时间，默认300000ms，若在该时间长度内未发起poll操作，视为该消费者离开消费组，需进行再均衡操作
