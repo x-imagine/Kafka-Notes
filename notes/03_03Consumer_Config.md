@@ -99,7 +99,10 @@ consumer自动提交时，提交的时间间隔，默认5秒。生效前提为en
 消费组管理消费者时，消费者拉取消息的最大间隔时间，默认300000ms，若在该时间长度内未发起poll操作，视为该消费者离开消费组，需进行再均衡操作
 
 ### partition.assignment.strategy
-消费者分区策略，默认RangeAssignor
+消费者分区策略，默认RangeAssignor      
+- org.apache.kafka.clients.consumer.RangeAssignor
+- org.apache.kafka.clients.consumer.RoundRobinAssignor
+- org.apache.kafka.clients.consumer.StickyAssignor 
 
 ### interceptor.class
 消费者拦截器
