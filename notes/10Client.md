@@ -111,4 +111,46 @@ leader将二阶段选举出的分配策略，通过GroupCoordinator同步给各�
 session.timeout.ms需在group.min.session.timeout.ms（6s）和group.max.session.timeout.ms（300s）之间，超过session.timeout.ms则触发再均衡   
 max.poll.interval.ms指定消费者组调用poll方法拉取消息的最大延迟，超过此时间，消费者被认为失败，触发再均衡   
 
-## __consumer_offsets
+## 三、消息传输机制
+消息传输在保障机制上一般有3个层级
+### 1.at most once
+最多一次，即便消息丢失或使用途中宕机等，均不再重复传输     
+### 2.at least once
+至少一次，可能因未及时收到响应，而传输重复消息
+### 3.exactly once
+有且仅有一次，能保证每条消息成功送达一次
+
+当生产者发送消息后，如果网络中断，则生产者无法感知是否已传输成功，故进行重试确保消息正常送达，但可能会重复写入
+当消费者处理消息时，处理消息与他提交offset的先后顺序，很大程度决定消费者提供哪种保障机制：   
+1.如果拉取后，先处理消息，再提交offset，那么在提交offset时宕机了，重新启动后，会再次拉取已处理过的消息，造成重复消费，对应at least once   
+2.如果拉取后，先提交offset，再处理消息，那么在处理消息时宕机了，重启后，不会再次拉取已同步offset的消息，造成消息遗漏，对应at most once
+
+通过幂等性和事务，可实现exactly once   
+
+## 四、幂等
+幂等就是保障对接口多次重复调用产生的结果和一次调用产生的结果一致   
+如生产者retry时的重复消息写入，可通过幂等性功能避免；但如果是相同的消息对象，客户端多次通过API发送，则为多条消息，与幂等性无关
+kafka的幂等性粒度对应到分区   
+### 1.开启
+打开生产者客户端参数enable.idempotence
+```
+    properties.put("enable.idempotence", true);
+```
+注：开启幂等性时，最好不显示的配置retries、acks、max.in.flight.requests.per.connection，原因是在开启幂等后：   
+1.retries必须大于0，否则报ConfigException: Must set retries to non-zero when using the idempotent producer，该参数默认Integer.MAX_VALUE   
+2.max.in.flight.requests.per.connection必须不大于5，否则报ConfigException，该参数默认为5   
+3.acks必须配置为-1，即所有副本都获得消息，否则报ConfigException，该参数默认为-1   
+所以，在不能开启幂等性的同时，上述参数能够正确配置的话，那么就直接不配置，用默认配置保证无异常   
+
+### 2.原理
+kafka通过producer id 和 sequence实现幂等
+- 每个生产者在创建时会分配一个PID——producer id，此行为用户无感知，也不影响业务
+- 每个PID消息发送到不同的分区，都会分配一个序列，类似oracle的sequence的递增序列
+- 生产者每发送消息，会以PID+分区作为“主键”，把其对应的sequence加1，把所有信息提交至broker
+- broker端会记录PID+分区已更新到的序列号，且称之为curSequenceNo，并在接收消息后检查当次提交的newSequenceNo   
+1.当本次发送来的newSequenceNo比curSequenceNo大1，则接受   
+2.当本次发送来的newSequenceNo比curSequenceNo小，则该消息已被处理，视为重复写入，不处理   
+3.当本次发送来的newSequenceNo - curSequenceNo > 1，则表示接到的消息不是连续的，中间可能有消息丢失，生产者将抛出OutOfOrderSequenceException
+
+## 五、事务
+
