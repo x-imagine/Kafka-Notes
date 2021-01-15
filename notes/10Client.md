@@ -153,4 +153,50 @@ kafka通过producer id 和 sequence实现幂等
 3.当本次发送来的newSequenceNo - curSequenceNo > 1，则表示接到的消息不是连续的，中间可能有消息丢失，生产者将抛出OutOfOrderSequenceException
 
 ## 五、事务
+幂等性无法跨分区控制，事务可跨分区控制，与数据库的操作多表的事务一样，kafka事务可以保证多分区操作行为的原子性   
+kafka的事务可以使程序对于多分区的消费消息、生产消息、提交offset的一系列操作作为一个原子性处理   
+### 1.开启
+在客户端设置transactionalId，对于一个客户端，其id为唯一值，transactionalId与PID一一对应   
+```
+ properties.put("transactional.id", "some_id");
+```
+同时，开启幂等性，若不开启幂等性则会抛出ConfigException   
+```
+    properties.put("enable.idempotence", true);
+```
+### 2.原理
+对生产者而言：   
+- 事务保证跨生产者会话的消息幂等发送   
+当拥有相同transactionalId的实例被创建时，旧的实例将不再工作，如两个生产者使用同一个transactionalId，则先启动的生产者报ProducerFencedException   
+- 跨生产者会话的事务恢复   
+当某个生产者宕机，新的生产者可以保证未完成的旧事务被提交或回滚，之后，新的生产者从一个正常的状态开始继续
 
+对消费者而言：   
+由于消费者的特点，导致事务特性作用在消费者上的保证性较弱，如以下情形无法保证日志中的消息如数被消费者消费   
+- 日志压缩：同key的消息部分会被清理
+- 日志清除：老日志分段被删除
+- seek访问：客户端通过seek()方法跳跃访问
+- 消费者未分配事务内的分区，无法消费事务中该分区的消息
+
+### 3.使用
+与jdbc类似，kafka事务也提供了以下几个方法处理事务
+```
+    void initTransactions();
+    void beginTransaction();
+    void sendOffsetsToTransaction(Map<TopicaPartition, OffsetAndMataData> offsets, String consumerGroupId);
+    void commitTransaction();
+    void abortTransaction();
+```
+- void initTransactions()：初始化事务，若未配置transactionalId，报IllegalStateException
+- void beginTransaction()：开启事务
+- void sendOffsetsToTransaction()：负责事务内的offset提交
+- void commitTransaction()：提交事务
+- void abortTransaction()：终止（回滚）事务
+
+### 3.隔离级别
+与数据库隔离级别对应，kafka也有自己的隔离级别   
+isolation.level 默认值为 "read_uncommitted"，另可修改"read_committed"
+1.read_uncommitted：生产者事务未提交时，亦可消费   
+2.read_committed：生产者事务未提交时，消息只缓存在consumer客户端，直到生产者执行commitTransaction()方可消费
+
+另外，在日志消息中，有一类控制消息ControlBatch，其包含commit、abort两类消息，KafkaConsumer通过该消息判断对应的事务是否被提交或回滚
