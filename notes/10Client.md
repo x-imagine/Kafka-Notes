@@ -200,3 +200,4 @@ isolation.level 默认值为 "read_uncommitted"，另可修改"read_committed"
 2.read_committed：生产者事务未提交时，消息只缓存在consumer客户端，直到生产者执行commitTransaction()方可消费
 
 另外，在日志消息中，有一类控制消息ControlBatch，其包含commit、abort两类消息，KafkaConsumer通过该消息判断对应的事务是否被提交或回滚
+
