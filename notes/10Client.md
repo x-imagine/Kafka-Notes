@@ -193,7 +193,7 @@ kafka的事务可以使程序对于多分区的消费消息、生产消息、提
 - void commitTransaction()：提交事务
 - void abortTransaction()：终止（回滚）事务
 
-### 3.隔离级别
+### 4.隔离级别
 与数据库隔离级别对应，kafka也有自己的隔离级别   
 isolation.level 默认值为 "read_uncommitted"，另可修改"read_committed"
 1.read_uncommitted：生产者事务未提交时，亦可消费   
