@@ -146,7 +146,7 @@ kafka-reassign-partitions.sh --bootstrap-server 192.168.137.88:9092 --execute --
 
 ## 三、复制限流
 重分配过程中，如果某分区数据量巨大，则复制数据会占用较大资源，可能影响业务的正常处理，避免资源抢占问题。   
-### 1.kafka-config.sh限流
+### 1.kafka-configs.sh限流
 1.1 broker限流
 ```
 kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --entity-type brokers --entity-name 1 --alter --add-config --follower.replication.thrott

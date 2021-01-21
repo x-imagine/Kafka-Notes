@@ -1,70 +1,88 @@
 # Commands
 Kafka安装目录中bin下的脚本执行。
-## 一、Topic
-kafka_topics.sh 参数说明：
-- --bootstrap-server 脚本连接的Kafka服务器地址
-- --zookeeper 作用同bootstrap-server，对早期版本的支持（0.9以前，通过zookeeper）
+## kafka_topics.sh
+ 参数说明：
+- --alter 修改topic配置关键字，修改分区、副本或其他主题配置
+- --bootstrap-server REQUIRED，脚本连接的Kafka服务器地址
+- --config 修改并覆盖topic创建之初的参数
+- --delete-config 移除覆盖的topic参数
+- --create 创建topic的动作指令
+- --delete 删除主题
+- --describe 展示topic的动作指令
 - --replication-factor 副本因子
 - --partitions 分区个数
-- --create 创建topic的动作指令
-- --describe 展示topic的动作指令
+- --zookeeper DEPRECATED，作用同bootstrap-server，对早期版本的支持（0.9以前，通过zookeeper）
 ### 1.创建topic
+- 基础款：采用默认配置创建topic
 ```
 kafka-topics.sh --create --topic topic-a --bootstrap-server 192.168.137.88:9092
 ```
 ![](pic/99Commands/create-topic.png)
-### 2.查看某topic
-```
-kafka-topics.sh --describe --topic topic-a --bootstrap-server 192.168.137.88:9092
-```
-![](pic/99Commands/desc-topic.png)
-### 3.查看topic list
-```
-kafka-topics.sh --list --bootstrap-server 192.168.137.88:9092
-```
-![](pic/99Commands/listTopic.png)
-### 4.删除topic
-```
-kafka-topics.sh --delete --topic topic-1,topic-2 --bootstrap-server 192.168.137.88:9092
-```
-### 5.修改分区
-```
-kafka-topics.sh --alter --partitions 4 --topic topic-a --bootstrap-server 192.168.137.88:9092
-```
-![](pic/99Commands/increase-partition.png)
-### 6.指定分区及副本分配方案创建topic 
-```
-kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --create --topic topic-name --replica-assignment 2:0,0:1,1:2,2:1
-```
-### 7.覆盖默认参数创建topic
+- 定制款A：指定分区、副本创建topic，覆盖部分默认参数
 ```
 kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --create --topic topic-name  --partitions 4 --replication-factor 2
 --config max.message.bytes=20000
 ```
-### 8.查看覆盖配置的topic
+--partitions：指定分区数量   
+--replication-factor：指定副本因子   
+--config：指定需要覆盖的参数
+
+- 定制款B：指定分区及副本分配方案创建topic 
+```
+kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --create --topic topic-name --replica-assignment 2:0,0:1,1:2,2:1
+```
+此方式隐含了分区数量、副本，故不必显示--partitions、--replication-factor   
+2:0,0:1,1:2,2:1代表4个分区、3个副本，其中，不同分区用“,”间隔，如上为4个分区指定分配情况，每个分区为副本分配的broker用“:”间隔
+
+### 2.查看topic
+- 指定topic：指定topic名，获取topic详细信息
+```
+kafka-topics.sh --describe --topic topic-a --bootstrap-server 192.168.137.88:9092
+```
+![](pic/99Commands/desc-topic.png)
+- 获取topic列表
+```
+kafka-topics.sh --list --bootstrap-server 192.168.137.88:9092
+```
+![](pic/99Commands/listTopic.png)
+- 查看覆盖配置的topic
 ```
 kafka-topics.sh --describe --bootstrap-server 192.168.137.88:9092 --topics-with-overrides
 ```
-### 9.修改topic配置
+### 3.删除topic
+- 通过topic名删除，多个用逗号分隔
+```
+kafka-topics.sh --delete --topic topic-1,topic-2 --bootstrap-server 192.168.137.88:9092
+```
+### 4.修改topic
+- 修改分区
+```
+kafka-topics.sh --alter --partitions 4 --topic topic-a --bootstrap-server 192.168.137.88:9092
+```
+![](pic/99Commands/increase-partition.png)
+注：不能改小，只能改大
+
+- 修改topic配置
 ```
 只修改分区
 kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --alter --topic topic-config --partitions 4
 修改分区和属性 
 kafka-topics.sh --zookeeper 192.168.137.88:2181 --alter --topic topic-config --partitions 6 --config segment.bytes=100000000
 ```
-### 10.删除topic配置，恢复默认配置
+- 删除topic配置，恢复默认配置
 ```
 kafka-topics.sh --zookeeper 192.168.137.88:2181 --alter --topic topic-config --delete-config segment.bytes
 ```
 
-### 11.手动分区平衡处理
-较早版本kafka：   
+## kafka-preferred-replica-election.sh
+较早版本kafka，如果存在broker节点分区负载较大，且未设置自动平衡参数，可手动平衡  
 - 全部主题重新分区平衡
 ```
 kafka-preferred-replica-election.sh --zookeeper 192.168.137.88:2181
 ```
 注：脚本对全部主题重新分区平衡，成本较高；如果主题和分区过多，信息也可能占满zookeeper中的/admin/preferred-replica-election节点（默认1M），导致失败
-- 指定主题重新分区平衡
+
+- 指定主题、分区重新分区平衡
 ```
 kafka-preferred-replica-election.sh --zookeeper 192.168.137.88:2181 election-rule.json
 ```
@@ -83,6 +101,7 @@ json样例
     ]
 }
 ```
+## kafka-leader-election.sh
 2.6.0版本kafka:
 - 全部主题重新分区平衡
 ```
@@ -91,9 +110,10 @@ kafka-leader-election.sh --bootstrap-server 192.168.137.88:9092 --all-topic-part
 - 指定主题重新分区平衡
 ```
 kafka-leader-election.sh --bootstrap-server 192.168.137.88:9092 --election-type PREFERRED --path-to-json-file election-rule.json
-```
+```chong
 
-### 12.分区重分配处理
+## kafka-reassign-partitions.sh
+在新增、分区重分配处理
 - 定义重分配主题的json文件
 ```
 {

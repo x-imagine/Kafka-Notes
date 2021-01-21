@@ -58,3 +58,11 @@ broker.id修改为不重复的值
 ```
 zookeeper.connect=192.168.137.88:2181,192.168.137.89:2181,192.168.137.90:2181
 ```
+
+集群部署后启动失败，关闭防火墙、建立主机间授信
+```
+firewall-cmd state
+systemctl stop firewalld.service
+systemctl disable firewalld.service
+```
+授信可使用脚本工具：https://github.com/simahao/lily/tree/main/tools/centos7.sh中第15个选项处理
