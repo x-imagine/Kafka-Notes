@@ -4,7 +4,8 @@
 - broker节点中的leader数量，体现了该节点的负载，leader越多，负载越大
 - 同一个broker节点，最多只有一个某分区的副本
 - 主题创建之初，kafka控制器默认会将副本的leader节点均匀的分配到各个broker节点，使负载处于相对均衡状态
-- 当某个分区的leader节点发生故障，将从follower节点中选举出新的leader节点，原有leader节点恢复工作后，并不会恢复leader节点身份
+- 当某个分区的leader节点发生故障，将从follower节点中选举出新的leader节点，原有leader节点恢复工作后，并不会恢复leader节点身份，如果参数auto.leader.rebalance.enable（默认true）打开，在一定时间后，会触发重分配，leader节点会重分配
+
 - 优先副本：优先副本指在创建主题后，副本列表中首个节点号（红色列）
 ![](pic/07Partitions/prefer-replica.png) 
 ## 一、优先副本

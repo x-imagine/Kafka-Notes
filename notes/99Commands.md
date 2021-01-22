@@ -75,7 +75,7 @@ kafka-topics.sh --zookeeper 192.168.137.88:2181 --alter --topic topic-config --d
 ```
 
 ## kafka-preferred-replica-election.sh
-较早版本kafka，如果存在broker节点分区负载较大，且未设置自动平衡参数，可手动平衡  
+较早版本kafka，如果存在broker节点分区负载较大，且未开启自动平衡参数（auto.leader.rebalance.enable），可手动平衡  
 - 全部主题重新分区平衡
 ```
 kafka-preferred-replica-election.sh --zookeeper 192.168.137.88:2181
@@ -110,7 +110,7 @@ kafka-leader-election.sh --bootstrap-server 192.168.137.88:9092 --all-topic-part
 - 指定主题重新分区平衡
 ```
 kafka-leader-election.sh --bootstrap-server 192.168.137.88:9092 --election-type PREFERRED --path-to-json-file election-rule.json
-```chong
+```
 
 ## kafka-reassign-partitions.sh
 在新增、分区重分配处理
@@ -182,43 +182,87 @@ kafka-reassign-partitions.sh --bootstrap-server 192.168.137.88:9092 --execute --
 ```
 执行后，broker节点1已不再拥有该主题的分区
 
-### 复制限流 之 kafka-config.sh
+## kafka-config.sh
+关键参数：
+- --entity-type：指定修改类型为brokers
+- --entity-name：提供一个int型的broker id
+- --alter：需要修改broker配置
+- --add-config：修改类型为增加配置项   
+不同类型对象可修改的属性，通过--help查询
+### 1.增加配置
+entity-type topic
+```
+ kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --alter --entity-type topics --entity-name topic-b --add-config 'max.message.bytes=50000000,flush.ms=100000'
+```
+修改配置于增加配置一致，直接修改属性值即可
+![](pic/99Commands/kafka-configs-topics.png) 
+
+### 2.删除配置
+```
+ kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --alter --entity-type topics --entity-name topic-b --delete-config 'max.message.bytes,flush.ms'
+```
+![](pic/99Commands/kafka-configs-topics-delete.png) 
+
+### 3.查看配置
+```
+ kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --describe --entity-type topics --entity-name topic-b
+```
+可以获取修改过的配置
+
+### 4.限流   
+- 复制限流
 ```
 kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --entity-type brokers --entity-name 1 --alter --add-config --follower.replication.thrott
 led.rate=1024,leader.replication.throttled.rate=1024
 ```
 ![](pic/07Partitions/config-throttle-broker.png) 
-关键参数：
-- --entity-type：指定修改类型为brokers
-- --entity-name：提供一个int型的broker id
-- --alter：需要修改broker配置
-- --add-config：修改类型为增加配置项
+
 - --follower.replication.throttled.rate=1024,leader.replication.throttled.rate=1024 增加内容及参数值
 
-### 取消复制限流
+- 取消复制限流
 ```
 kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --entity-type brokers --entity-name 1 --alter --delete-config --follower.replication.throttled.rate,leader.replication.throttled.rate
 ```
 
-## 二、Producer
+## kafka-console-producer.sh
 Producer参数说明：
 - --bootstrap-server 目标Kafka服务
 - --broker-list 同--bootstrap-server，均可表示目标Kafka服务
 - --topic 目标topic
-### 1.生产数据
+### 1.无key数据
 ```
 kafka-console-producer.sh --topic topic-a --bootstrap-server 192.168.137.88:9092
 ```
 ![](pic/99Commands/producerByTopic.png)
 
-## 三、Consumer
-### 1.指定topic消费
+### 2.带key数据
+```
+kafka-console-producer.sh --topic topic-a --bootstrap-server 192.168.137.88:9092 --property parse.key=true
+```
+![](pic/99Commands/producerByTopicWithKey.png)
+注：key与value之间需要用tab分隔
+
+## kafka-console-consumer.sh
+### 1.即时消费
+不会追溯历史消息
 ```
 kafka-console-consumer.sh --topic topic-a --bootstrap-server 192.168.137.88:9092
 ```
 ![](pic/99Commands/consumerByTopic.png)
+### 2.指定起点消费
+从头开始消费
+```
+kafka-console-consumer.sh --bootstrap-server 192.168.137.88:9092 --topic topic-b --from-beginning 
+```
+![](pic/99Commands/consumer-from-beginning.png)
+从指定位移消费
+```
+kafka-console-consumer.sh --bootstrap-server 192.168.137.88:9092 --topic topic-b --partition 0 --offset 2
+```
+![](pic/99Commands/consumer-from-offset.png)
+注：必须指定分区，否则offset无法确定是哪个分区，同时，offset可以指定为earliest、latest或无符号数
 
-### 2.指定partition消费
+### 3.指定partition消费
 ```
 kafka-console-consumer.sh --topic topic-a --partition 0 --bootstrap-server 192.168.137.88:9092
 ```
