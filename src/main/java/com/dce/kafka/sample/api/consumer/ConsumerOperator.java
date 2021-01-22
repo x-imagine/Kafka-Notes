@@ -26,7 +26,7 @@ public class ConsumerOperator {
     private static final AtomicBoolean isRunning = new AtomicBoolean(true);
 
     public static void main(String[] args) throws InterruptedException {
-        // consumerAutoCommit();
+        consumerAutoCommit();
         // consumerAssignPartition();
         // consumerNotAutoCommit();
         // consumerCommitBypartition();
@@ -37,7 +37,7 @@ public class ConsumerOperator {
         // consumerPause();
         // consumerResume();
         // consumerBreakWhile();
-        consumerSeek();
+        // consumerSeek();
     }
 
 

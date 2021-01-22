@@ -267,3 +267,51 @@ kafka-console-consumer.sh --bootstrap-server 192.168.137.88:9092 --topic topic-b
 kafka-console-consumer.sh --topic topic-a --partition 0 --bootstrap-server 192.168.137.88:9092
 ```
 ![](pic/99Commands/consumerByPartition.png)
+
+## kafka-consumer-groups.sh
+### 1.查看消费组列表
+```
+kafka-consumer-groups.sh --bootstrap-server 192.168.137.88:9092 --list
+```
+![](pic/99Commands/consumer-group-list.png)
+
+### 2.查看消费组详细
+```
+kafka-consumer-groups.sh --bootstrap-server 192.168.137.88:9092 --describe --group test_consumer_group_id
+```
+![](pic/99Commands/consumer-groups-describe.png)
+- GROUP：组名
+- TOPIC：订阅的主题
+- PARTITION：对应的分区编号
+- CURRENT-OFFSET：当前偏移量
+- LOG-END-OFFSET：HW高水位
+- LAG：消费滞后的数量，等于LOG-END-OFFSET - CURRENT-OFFSET
+- CONSUMER-ID：消费组成员id
+- HOST：消费者所在host
+- CLIENT-ID：消费者客户端clientId
+
+### 3.查看消费组状态
+```
+kafka-consumer-groups.sh --bootstrap-server 192.168.137.88:9092 --describe --group test_consumer_group_id --state
+```
+- stable：有消费者成员
+![](pic/99Commands/consumer-groups-state.png)
+- empty：无消费者成员
+![](pic/99Commands/consumer-groups-state-empty.png)
+其他状态：
+- prepareingRebalance：准备再平衡
+- completeRebalance：完成再平衡
+- dead：挂了
+
+### 4.查看消费组成员
+```
+kafka-consumer-groups.sh --bootstrap-server 192.168.137.88:9092 --describe --group test_consumer_group_id --members --verbose
+```
+![](pic/99Commands/consumer-group-members.png)
+
+### 5.删除消费组
+删除只可处理未在运行的消费组，否则报错
+```
+kafka-consumer-groups.sh --bootstrap-server 192.168.137.88:9092 --delete --group test_consumer_group_id
+```
+![](pic/99Commands/consumer-group-delete.png)

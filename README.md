@@ -14,7 +14,7 @@
 - [Log](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/08Log.md)
 - [Server](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/09Server.md)
 - [Client](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/10Client.md)
-- [Command-Line Tools](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/11Tools.md)
+- [Command-Line Tools](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/99Commands.md)
 - Reliability
 - Monitor
 
@@ -24,9 +24,6 @@
 - [Producer Config](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/03_02Producer_Config.md)
 - [Consumer Config](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/03_03Consumer_Config.md)
 - [Topic Config](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/03_04Topic_Config.md)
-
-## Commands
-- [Commands](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/99Commands.md)
 
 ## Q&A
 - [Q&A](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/Q&A.md)
