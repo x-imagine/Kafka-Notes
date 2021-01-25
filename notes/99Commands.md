@@ -315,3 +315,38 @@ kafka-consumer-groups.sh --bootstrap-server 192.168.137.88:9092 --describe --gro
 kafka-consumer-groups.sh --bootstrap-server 192.168.137.88:9092 --delete --group test_consumer_group_id
 ```
 ![](pic/99Commands/consumer-group-delete.png)
+
+
+## kafka-producer-perf-test.sh
+producer性能测试，可通过自带的脚本kafka-producer-perf-test.sh，主要参数：
+- --topic：目标topic
+- --num-records：发送消息总数
+- --throughput 10：吞吐量，单位时间内成功地传送数据的数量
+- --record-size 10：消息大小字节数
+- --producer-props：配置本次测试的属性，键值对方式，多个属性用空格，注：是属性，不是命令行的参数 bootstrap.servers=192.168.137.88:9092
+```
+kafka-producer-perf-test.sh --producer-props bootstrap.servers=192.168.137.88:9092 --topic topic-b --num-records 1000 --throughput 10 --record-size 10
+```
+执行后可获得传输速率，最大延迟、最小延迟：
+![](pic/99Commands/kafka-producer-perf-test.png)
+实际发出的测试消息：
+![](pic/99Commands/kafka-producer-perf-test-result.png)
+
+## kafka-consumer-perf-test.sh
+consumer性能测试，可通过自带脚本kafka-consumer-perf-test.sh，主要参数：
+- --bootstrap-server：目标kafka服务节点
+- --topic：目标topic
+- --messages：消费的消息总数
+- --fetch-size：单次请求取回消息的大小，默认1048576B
+- --threads：消费消息的线程数
+- --timeout：消费超时时间
+```
+kafka-consumer-perf-test.sh --bootstrap-server 192.168.137.88:9092 --topic topic-b --messages 10000 --fetch-size 100 --threads 1
+```
+执行后获得消费消息的开始时间、结束时间、记录大小、流量速率（M/S）、记录速率（记录数/S）等信息：
+![](pic/99Commands/kafka-consumer-perf-test-result.png)
+注：测试前要确保主题中的记录数足够，当性能测试拉取的消息总数，大于主题中的消息总数，则会超时，因为迟迟没有拉取到目标数量的消息
+![](pic/99Commands/kafka-consumer-perf-test-timeout.png)
+实际测试根据不同的参数修改，测试不同的参数运行情况
+![](pic/99Commands/kafka-consumer-perf-test-para.png)
+
