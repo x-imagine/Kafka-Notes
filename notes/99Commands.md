@@ -316,7 +316,6 @@ kafka-consumer-groups.sh --bootstrap-server 192.168.137.88:9092 --delete --group
 ```
 ![](pic/99Commands/consumer-group-delete.png)
 
-
 ## kafka-producer-perf-test.sh
 producer性能测试，可通过自带的脚本kafka-producer-perf-test.sh，主要参数：
 - --topic：目标topic
@@ -349,4 +348,39 @@ kafka-consumer-perf-test.sh --bootstrap-server 192.168.137.88:9092 --topic topic
 ![](pic/99Commands/kafka-consumer-perf-test-timeout.png)
 实际测试根据不同的参数修改，测试不同的参数运行情况
 ![](pic/99Commands/kafka-consumer-perf-test-para.png)
+
+## kafka-delete-records.sh
+删除消息脚本，需要通过json文件提供删除的topic 和 partition
+```
+{
+"partitions":
+        [
+            {
+                "topic": "topic-b",
+                "partition": 1,
+                "offset": 1
+            }
+        ],
+        "version":1
+}
+
+```
+执行删除脚本
+```
+ kafka-delete-records.sh --bootstrap-server 192.168.137.88:9092 --offset-json-file delete-records.json
+```
+![](pic/99Commands/delete-record-json.png)
+![](pic/99Commands/delete-records.png)
+注：json脚本中的offset是从清除后的low_watermark，如果是1000，执行脚本后，该分区的offset就从1000起，1000之前的消息都删除
+![](pic/99Commands/delete-records-result.png)
+
+
+## kafka-run-class.sh
+
+### 1.获取offset
+```
+kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 192.168.137.88:9092 --topic topic-b --time -1
+kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 192.168.137.88:9092 --topic topic-b --time -2
+```
+- -–time：-1 表示获取最大位移，-2 表示获取当前最早位移；分区当前的消息总数 = –time-1 - –time-2
 
