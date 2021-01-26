@@ -371,9 +371,28 @@ kafka-consumer-perf-test.sh --bootstrap-server 192.168.137.88:9092 --topic topic
 ```
 ![](pic/99Commands/delete-record-json.png)
 ![](pic/99Commands/delete-records.png)
-注：json脚本中的offset是从清除后的low_watermark，如果是1000，执行脚本后，该分区的offset就从1000起，1000之前的消息都删除
+注：json脚本中的offset是从清除后的low_watermark，即保留到哪个offset，而不是从哪个offset删；如果是1000，执行脚本后，该分区的offset就从1000起，1000之前的消息都删除
 ![](pic/99Commands/delete-records-result.png)
 
+## kafka-dump-log.sh
+工具有助于解析日志文件并将其内容转储到控制台，对于调试看似损坏的日志分段或索引分段等信息
+- 查看日志输出控制台
+```
+$KAFKA_HOME/bin/kafka-dump-log.sh --files ./00000000000000000000.log
+```
+![](pic/99Commands/dump-log.png)
+- 查看位移索引数据   
+无法直接打开索引文件直观查看索引，通过kafka-dump-log.sh可对偏移量索引的稀疏索引进行查看
+```
+$ka/bin/kafka-dump-log.sh --files ./00000000000000000000.index
+```
+![](pic/99Commands/dump-log-index.png)
+
+- 查看时间戳索引
+```
+$ka/bin/kafka-dump-log.sh --files ./00000000000000000000.timeindex
+```
+![](pic/99Commands/dump-log-timeindex.png)
 
 ## kafka-run-class.sh
 

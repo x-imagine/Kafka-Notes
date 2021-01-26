@@ -89,10 +89,10 @@
 1.relativeOffset ：前4个字节为相对偏移量，相对指相对于baseOffset，如分段文件的baseOffset为10，relativeOffset为5，则对应消息的实际offset=15   
 2.position ：后4个字节为物理地址，描述消息在所在分段中的物理地址   
 注：4个字节的相对偏移量，比绝对偏移量更节约空间；同时，也解释了为何超出Integer.MAX大小之后，日志分段文件进行切分，因为relativeOffset的4个字节无法装更大值
-- 查看索引数据
+- 查看索引数据   
 无法直接打开索引文件直观查看索引，通过kafka-dump-log.sh可对偏移量索引的稀疏索引进行查看
 ```
-$ka/bin/kafka-dump-log.sh --files ./00000000000000000000.indexDumping ./00000000000000000000.index
+$ka/bin/kafka-dump-log.sh --files ./00000000000000000000.index
 ```
 ![](pic/08Log/offset-index-log.png)
 注：在一条日志也未生成日志的情况下，该命令查询报NoSuchElementException
