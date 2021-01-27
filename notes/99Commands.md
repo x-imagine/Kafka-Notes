@@ -445,3 +445,14 @@ kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 192.168.137.88:9092 
 ```
 - -–time：-1 表示获取最大位移，-2 表示获取当前最早位移；分区当前的消息总数 = –time-1 - –time-2
 
+## kafka-replica-verification.sh
+验证副本复制进度延迟情况
+
+## kafka-verifiable-consumer.sh
+消费指定topic的消息，并发出消费者事件
+
+## kafka-verifiable-producer.sh
+持续发送消息到指定的topic中，且每条发送的消息都会有响应信息，kafka-console-producer.sh无响应
+
+## kafka-mirror-maker.sh
+kafka集群复制工具
