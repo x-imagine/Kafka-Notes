@@ -394,6 +394,48 @@ $ka/bin/kafka-dump-log.sh --files ./00000000000000000000.timeindex
 ```
 ![](pic/99Commands/dump-log-timeindex.png)
 
+## kafka-log-dirs.sh
+通过脚本查看主题中分区日志文件位置、size、offset延迟情况等信息
+- --bootstrap-server：必须，目标server
+- --describe：必须
+- --broker-list：查看目标broker id，不指定则为所有broker
+- --topic-list：查询目标topic，不指定则为所有topic
+```
+kafka-log-dirs.sh --bootstrap-server 192.168.137.88:9092 --broker-list 0 --describe --topic-list topic-b
+```
+![](pic/99Commands/log-dirs-broker.png)
+格式化后
+```json
+{
+	"version": 1,
+	"brokers": [{
+		"broker": 0,
+		"logDirs": [{
+			"logDir": "/tmp/kafka-logs",
+			"error": null,
+			"partitions": [{
+				"partition": "topic-b-2",
+				"size": 221079,
+				"offsetLag": 0,
+				"isFuture": false
+			}, {
+				"partition": "topic-b-1",
+				"size": 223851,
+				"offsetLag": 0,
+				"isFuture": false
+			}, {
+				"partition": "topic-b-0",
+				"size": 240688,
+				"offsetLag": 0,
+				"isFuture": false
+			}]
+		}]
+	}]
+}
+```
+不指定broker，则显式所有节点的分区情况
+![](pic/99Commands/log-dirs-topic.png)
+
 ## kafka-run-class.sh
 
 ### 1.获取offset
