@@ -11,6 +11,9 @@ systemctl stop firewalld.service
 #禁止开机启动
 systemctl disable firewalld.service
 ```
+## 3.主机休眠或睡眠再唤醒，无法连接虚拟机（kafka所在的虚拟机）
+原因是休眠后虚拟网卡没有被唤醒，需要在“网络和 Internet\更改适配器选项”找到虚拟网卡，禁用-启用即可
+
 # 二、kafka机制
 ## 1.消息在kafka中存多久
 broker的log.cleanup.policy=delete\compact决定删除还是压缩，可同时支持两种   

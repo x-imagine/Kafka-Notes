@@ -446,7 +446,16 @@ kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 192.168.137.88:9092 
 - -–time：-1 表示获取最大位移，-2 表示获取当前最早位移；分区当前的消息总数 = –time-1 - –time-2
 
 ## kafka-replica-verification.sh
-验证副本复制进度延迟情况
+验证分区内leader副本与非follower副本的同步延迟情况，这个命令有点类似ping命令，就是在规定的频度内不停检查同步延迟情况
+- --broker-list：必填，目标server
+- --topic-white-list：校验topic列表，不写默认所有topic
+- --report-interval-ms：报告的频率，默认30s
+```
+kafka-replica-verification.sh --broker-list 192.168.137.88:9092
+kafka-replica-verification.sh --broker-list 192.168.137.88:9092 --topic-white-list topic-b --report-interval-ms 1000
+```
+![](pic/99Commands/replica-varification.png)
+如图，在有消息生产时，部分分区是在时间点上是有一些同步延迟的记录的，有哪个分区被监控到就打印哪个，所以不用关注为什么打印的是一个分区，其他的怎么没监控，因为监控的是among的后的74个partition
 
 ## kafka-verifiable-consumer.sh
 消费指定topic的消息，并发出消费者事件
