@@ -458,10 +458,87 @@ kafka-replica-verification.sh --broker-list 192.168.137.88:9092 --topic-white-li
 如图，在有消息生产时，部分分区是在时间点上是有一些同步延迟的记录的，有哪个分区被监控到就打印哪个，所以不用关注为什么打印的是一个分区，其他的怎么没监控，因为监控的是among的后的74个partition
 
 ## kafka-verifiable-consumer.sh
-消费指定topic的消息，并发出消费者事件
-
+消费指定topic的消息，并发出消费者事件，执行的结果以json格式返回
+- --bootstrap-server：目标服务器
+- --group-id：必选，消费者groupId
+- --topic：必选，目标topic
+- --max-messages：最大消息数，不选默认-1，不限制
+- --reset-policy：消费消息的偏移量起始位置，可选：earliest、latest、none
+```
+kafka-verifiable-consumer.sh --bootstrap-server 192.168.137.88:9092 --topic topic-b --max-messages 1000 --group-id group
+kafka-verifiable-consumer.sh --bootstrap-server 192.168.137.88:9092 --topic topic-b --group-id group
+```
+![](pic/99Commands/verifiable-consumer.png)
+脚本启动后，如果没有max-messages没有设置，则一直守候，主题中有消息即时消费   
+返回的消费结果格式
+```json
+{
+	"timestamp": 1611839614834,
+	"name": "records_consumed",
+	"count": 1,
+	"partitions": [{
+		"topic": "topic-b",
+		"partition": 2,
+		"count": 1,
+		"minOffset": 8139,
+		"maxOffset": 8139
+	}]
+}
+```
+同步结果格式
+```json
+ {
+	"timestamp": 1611839614837,
+	"name": "offsets_committed",
+	"offsets": [{
+		"topic": "topic-b",
+		"partition": 2,
+		"offset": 8140
+	}],
+	"success": true
+}
+```
 ## kafka-verifiable-producer.sh
-持续发送消息到指定的topic中，且每条发送的消息都会有响应信息，kafka-console-producer.sh无响应
+持续发送消息到指定的topic中，且每条发送的消息都会有响应信息，与kafka-console-producer.sh差别是，console无响应信息，此脚本有响应信息
+- --bootstrap-server：目标服务器
+- --topic：必选，目标topic
+- --max-messages：最大消息数，不选默认-1，不限制
+- --acks:消息同步到副本的参数，默认-1所有副本都同步才视为发送成功
+```
+kafka-verifiable-producer.sh --bootstrap-server 192.168.137.88:9092 --topic topic-b --max-messages 10  --throughput 10
+```
+![](pic/99Commands/verifiable-producer.png)
+响应格式：
+```json
+{
+	"timestamp": 1611848045882,
+	"name": "producer_send_success",
+	"key": null,
+	"value": "9",
+	"topic": "topic-b",
+	"partition": 2,
+	"offset": 8182
+}
+```
+
+## kafka-run-class.sh
+此脚本开启了一扇面向kafka.tools下所有scala工具的新的大门，通过该脚本可以向java一样在控制台调用kafka.tools下的工具类   
+可通过命令先获取工具类的参数说明，在根据其参数使用工具，如：
+```
+kafka-run-class.sh kafka.tools.GetOffsetShell
+```
+![](pic/99Commands/kafka-run-class-GetOffsetShell.png)
+根据说明使用参数获取topic最大位移
+```
+kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 192.168.137.88:9092 --topic topic-b --time -1
+```
+### 1.获取offset
+```
+kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 192.168.137.88:9092 --topic topic-b --time -1
+kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 192.168.137.88:9092 --topic topic-b --time -2
+```
+- -–time：-1 表示获取最大位移，-2 表示获取当前最早位移；分区当前的消息总数 = –time-1 - –time-2   
+![](pic/99Commands/kafka-run-class-offset.png)
 
 ## kafka-mirror-maker.sh
 kafka集群复制工具
