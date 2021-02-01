@@ -435,16 +435,7 @@ kafka-log-dirs.sh --bootstrap-server 192.168.137.88:9092 --broker-list 0 --descr
 ```
 不指定broker，则显式所有节点的分区情况
 ![](pic/99Commands/log-dirs-topic.png)
-
-## kafka-run-class.sh
-
-### 1.获取offset
-```
-kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 192.168.137.88:9092 --topic topic-b --time -1
-kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 192.168.137.88:9092 --topic topic-b --time -2
-```
-- -–time：-1 表示获取最大位移，-2 表示获取当前最早位移；分区当前的消息总数 = –time-1 - –time-2
-
+****
 ## kafka-replica-verification.sh
 验证分区内leader副本与非follower副本的同步延迟情况，这个命令有点类似ping命令，就是在规定的频度内不停检查同步延迟情况
 - --broker-list：必填，目标server

@@ -101,7 +101,7 @@ kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --alter --topic topic-con
 ![](pic/06Topics/alter_create.png)
 增加分区数量：      
 ![](pic/06Topics/alter_partitions.png)   
-- 当对分区数量修改是，如果原消息包含key值，则调整分区数量后原消息归属的分区逻辑将改变
+- 当对分区数量修改时，如果原消息包含key值，则调整分区数量后原消息归属的分区逻辑将改变
 - 修改主题配置时，需要结合--config对配置信息进行修改
 ```
 kafka-topics.sh --zookeeper 192.168.137.88:2181 --alter --topic topic-config --partitions 6 --config segment.bytes=100000000

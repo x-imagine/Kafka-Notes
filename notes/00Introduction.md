@@ -33,7 +33,8 @@ AR（Assigned Replicas）：所有副本集合，AR = ISR + OSR，leader负责�
 #### 3.2 partition 中的变量
 - LSO（LogStartOffset）:分区文件起始偏移量，即第一条消息所在的位置；   
 - LEO(LogEndOffset):分区文件当前终止偏移量，即如果再产生一条消息时即将写入的位置；   
-- HW（HighWatermark）:ISR副本分区中，最小的LogEndOffset的值，消费者消费时，仅能消费该offset以前的消息，不包括该位置；     
+- HW（HighWatermark）:ISR副本分区中，最小的LogEndOffset的值，消费者消费时，仅能消费该offset以前的消息，不包括该位置；    
+- LW（Low Watermark）：低水位，代表 AR 集合中最小的 logStartOffset 值。副本的拉取请求和删除消息请求能促使LW的增长； 
 - LEO、HW作为关键的存在，体现了partition同步的逻辑，即多副本之间在持续同步，而同步最慢的副本，制约着消费者可获取的消息数量。   
 如：   
 生产者产生了10个消息：   
