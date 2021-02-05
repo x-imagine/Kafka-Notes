@@ -1,4 +1,4 @@
-package com.dce.kafka.sample;
+package com.dce.kafka.constants;
 
 /**
  * 实验用常量

@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
-import static com.dce.kafka.sample.Cons.HOST_PORT;
+import static com.dce.kafka.constants.Cons.HOST_PORT;
 
 /**
  * 获取AdminClient

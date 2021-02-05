@@ -2,7 +2,7 @@ package com.dce.kafka.sample.api.consumer;
 
 import java.util.Properties;
 
-import static com.dce.kafka.sample.Cons.HOST_PORT;
+import static com.dce.kafka.constants.Cons.HOST_PORT;
 
 /**
  * Consumer配置

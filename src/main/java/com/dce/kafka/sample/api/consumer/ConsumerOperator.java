@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.dce.kafka.sample.Cons.TEST_TOPIC_NAME_MUTI_PARTITION;
+import static com.dce.kafka.constants.Cons.TEST_TOPIC_NAME_MUTI_PARTITION;
 
 /**
  * 消费者操作

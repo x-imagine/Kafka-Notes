@@ -1,6 +1,6 @@
 package com.dce.kafka.sample.api.producer;
 
-import com.dce.kafka.sample.Cons;
+import com.dce.kafka.constants.Cons;
 import com.dce.kafka.sample.interceptor.PrefixProducerInterceptor;
 
 import java.util.Properties;
