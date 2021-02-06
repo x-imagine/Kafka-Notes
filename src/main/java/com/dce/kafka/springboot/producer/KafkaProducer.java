@@ -30,7 +30,6 @@ public class KafkaProducer {
                 //发送失败的处理
                 LOGGER.info(TEST_TOPIC_NAME_MUTI_PARTITION + " - 生产者 发送消息失败：" + throwable.getMessage());
             }
-
             @Override
             public void onSuccess(SendResult<String, Object> stringObjectSendResult) {
                 //成功的处理
