@@ -15,7 +15,8 @@ public class KafkaProducerTest {
     KafkaProducer kafkaProducer;
 
     @Test
-    public void sendTest() {
+    public void sendTest() throws InterruptedException {
         kafkaProducer.send("hello");
+        Thread.sleep(10000);
     }
 }
