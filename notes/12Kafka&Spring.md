@@ -113,15 +113,11 @@ public class KafkaAutoConfiguration {
 存在@Bean methodA、@Bean methodB两个方法，proxyBeanMethods=true，methodB方法调用了methodA，其获取的实例和methodA返回给容器的实例是一个；proxyBeanMethods=false，则methodA产生一个实例，methodB产生一个新的实例。据称false方式能够提高性能   
 - @ConditionalOnClass(KafkaTemplate.class)：执行条件注解，只有当工程环境中存在KafkaTemplate.class才生成实例，否则不作为
 - @EnableConfigurationProperties(KafkaProperties.class)：启用KafkaProperties与yml配置文件绑定，KafkaProperties的@ConfigurationProperties(prefix = "spring.kafka")对应到yml
+- @Import在生成实例的同时，也生成KafkaAnnotationDrivenConfiguration、KafkaStreamsAnnotationDrivenConfiguration的实例，使用@Import导入相对灵活，避免了直接在导入类中@Component却不使用的浪费情况
+
 ```
 @ConfigurationProperties(prefix = "spring.kafka")
 public class KafkaProperties {
     ...
 }
 ```
-
-
-### 应用的扩展
-在简单级别的使用后，根据项目业务情况可以进行使用上的扩展
-- 运维泛型，建立Wapper类对发送对象封装为统一对象，便于在系统中形成发送消息的统一接口，以便扩展各类对象传输及其他消息中间件替换
-- 增加
