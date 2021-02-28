@@ -9,7 +9,8 @@
 ### 安装
 1.获取   
 https://github.com/yahoo/CMAK获取release压缩包   
-下载不了从百度网盘下载：https://pan.baidu.com/s/12Bn_8MjzcFUsAYawarPEvQ 提取码：9527 
+下载不了从百度网盘下载：https://pan.baidu.com/s/12Bn_8MjzcFUsAYawarPEvQ 提取码：9527  
+  
 2.配置   
 - 解压至服务器
 ```
