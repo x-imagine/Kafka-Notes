@@ -6,6 +6,9 @@ package com.dce.kafka.constants;
 public class Cons {
     // kafka server ip:port
     final public static String HOST_PORT = "192.168.137.88:9092";
+    final public static String JMX_HOST_PORT = "192.168.137.89:9999";
+    final public static String JMX_HOST_PORT_1 = "192.168.137.89:9999";
+    final public static String JMX_HOST_PORT_2 = "192.168.137.90:9999";
 
     final public static String TEST_TOPIC_NAME_MUTI_PARTITION = "topic-b";
     final public static String TEST_TOPIC_NAME_ONE_PARTITION = "book-topic";

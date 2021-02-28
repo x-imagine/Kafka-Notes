@@ -14,10 +14,10 @@
 - [Log](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/08Log.md)
 - [Server](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/09Server.md)
 - [Client](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/10Client.md)
+- [Tools](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/11Tools.md)
+- [Kafka&Spring](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/12Kafka&Spring.md)
+- [Monitor](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/13Monitor.md)
 - [Command-Line Tools](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/99Commands.md)
-- Reliability
-- Monitor
-
 
 ## Configuration
 - [Broker Config](https://github.com/mihumouse/Kafka-Notes/blob/main/notes/03_01Broker_Config.md)
