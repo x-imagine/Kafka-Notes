@@ -58,6 +58,7 @@ kafka-preferred-replica-election.sh追加path-to-json-file + json文件路径，
  kafka-preferred-replica-election.sh --zookeeper 192.168.137.88:2181 election-rule.json
 ```
 ![](pic/07Partitions/prefer-by-json-file.png) 
+
 注：执行过程提示“This tool is deprecated. Please use kafka-leader-election tool.”，较高版本kafka可执行
 ```
 kafka-leader-election.sh --bootstrap-server 192.168.137.88:9092 --election-type PREFERRED --path-to-json-file election-rule.json
@@ -84,6 +85,7 @@ kafka-leader-election.sh --bootstrap-server 192.168.137.88:9092 --election-type 
 kafka-reassign-partitions.sh --bootstrap-server 192.168.137.88:9092 --generate --topics-to-move-json-file reassign-rule.json --broker-list 0,2
 ```
 ![](pic/07Partitions/reaasign-json.png) 
+
 执行kafka-reassign-partitions.sh后生成两段json串：   
 前段为当前主题分区配置情况，用于备份，失败后可还原；
 后端为目标主题分区配置方案，需要保存为json文件，用于下一步执行；   
@@ -138,8 +140,11 @@ kafka-reassign-partitions.sh --bootstrap-server 192.168.137.88:9092 --generate -
 kafka-reassign-partitions.sh --bootstrap-server 192.168.137.88:9092 --execute --reassignment-json-file reassign-execute.json
 ```
 执行后，broker节点1已不再拥有该主题的分区
+
 ![](pic/07Partitions/reassign-execute.png) 
+
 重分配原理：
+
 1.kafka控制器为主题下的分区新增一个副本，需要临时增加副本因子；   
 2.将分区副本的leader节点数据复制到新的副本中；   
 3.将下线节点的旧副本清除，同时降低临副本因子。   
@@ -154,6 +159,7 @@ kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --entity-type brokers --
 led.rate=1024,leader.replication.throttled.rate=1024
 ```
 ![](pic/07Partitions/config-throttle-broker.png)
+
 查看结果   
 ```
 kafka-configs.sh --zookeeper 192.168.137.88:2181 --entity-type brokers --entity-name 1 --describe
@@ -165,12 +171,14 @@ kafka-configs.sh --zookeeper 192.168.137.88:2181 --entity-type brokers --entity-
 - --alter：需要修改broker配置
 - --add-config：修改类型为增加配置项
 - --follower.replication.throttled.rate=1024,leader.replication.throttled.rate=1024 增加内容及参数值
+
 1.2取消限流
 ```
 kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --entity-type brokers --entity-name 1 --alter --delete-config --follower.replication.throttled.rate,leader.replication.throttled.rate
 ```
 ![](pic/07Partitions/config-delete-throttle-broker.png) 
-1.2 topic限流   
+
+1.3 topic限流   
 类似broker限流，主题级别同样通过kafka-configs.sh进行限流处理，不过在限流时需要制定leader分区、follower分区
 ![](pic/07Partitions/config-throttle-topic-info.png) 
 

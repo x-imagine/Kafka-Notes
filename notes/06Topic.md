@@ -62,12 +62,15 @@ kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --create --topic topic-na
 kafka-topics.sh --list --bootstrap-server 192.168.137.88:9092
 ```
 ![](pic/06Topics/list_topic.png)
+
 其中__开头的为kafka内置的主题
+
 2.查看指定主题--describe
 ```
 kafka-topics.sh --describe --topic topic-a,book-topic --bootstrap-server 192.168.137.88:9092
 ```
 ![](pic/06Topics/describe_topics.png)
+
 3.查看覆盖配置的主题--topic-with-overrides
 如使用--config，覆盖了topic的默认配置，可通过--describe + --topic-with-overrides获取，返回内容只是--list的首行
 ```
@@ -99,6 +102,7 @@ kafka-topics.sh --bootstrap-server 192.168.137.88:9092 --alter --topic topic-con
 ```
 
 ![](pic/06Topics/alter_create.png)
+
 增加分区数量：      
 ![](pic/06Topics/alter_partitions.png)   
 - 当对分区数量修改时，如果原消息包含key值，则调整分区数量后原消息归属的分区逻辑将改变
@@ -130,7 +134,7 @@ kafka-configs.sh --bootstrap-server 192.168.137.88:9092 --describe --entity-type
 - 通过kafka-configs.sh修改配置时，zookeeper会创建对应的节点存储修改的配置信息，待到查看时，就从该节点获取信息
 ![](pic/06Topics/zkCli-topics.png)   
 
-### 四、删除主题
+### 五、删除主题
 - kafka内部自带主题不可删除
 - 不存在的主题不可删除，删除时报IllegalArgumentException，通过 --if-exists来忽略此异常
 - 主题删除的本质是zookeeper中/admin/delete_topics/下创建了一个待删除节点，由kafka控制器读取节点最终完成主题删除；故也可以手工增加zookeeper节点来删除主题

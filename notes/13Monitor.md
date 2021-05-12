@@ -35,7 +35,7 @@ nohup bin/cmak -Dconfig.file=conf/application.conf &
 ### 主题信息
 ![](pic/13Monitor/topic-info.png)
 ### 管理功能
-![](pic/13Monitor/func.png)
+![](pic/13Monitor/func.png)    
 进入集群后，有很多管理功能，如增加主题、分区、优化副本等，都能对应到kafka/bin下的脚本工具，只不过增加了可视化支持
 
 ## 自定义监控
@@ -51,13 +51,13 @@ JMX_PORT=9999 nohup kafka-server-start.sh ../config/server.properties &
 使用JDK中自带的Jconsole工具，可与上步JXM的对接，获取监控信息   
 选择远程进程，录入：IP:端口即可   
 
-![](pic/13Monitor/JConsoleCreate.png)
+![](pic/13Monitor/JConsoleCreate.png)    
 注：若无法连接可查看防火墙是否关闭、网络端口是否开放、目标端的hostname -i是否为录入IP（而非127.0.0.1）   
 
-![](pic/13Monitor/JConsoleInfo.png)
+![](pic/13Monitor/JConsoleInfo.png)    
 建立连接后可查看目标服务的多维度监控信息，对于Kafka的监控内容，需要看MBean部分
 
-![](pic/13Monitor/JConsoleMBean.png)
+![](pic/13Monitor/JConsoleMBean.png)    
 MBean界面左侧的树结构定义了可查看kafka的各类维度，如Log下的LogEndOffset可获取不同topic的偏移量情况   
 整个MBean内容是自定义监控的数据基础或者理解为API，通过Java代码可读取所有项信息，建立符合自身需求的监控模块
 
@@ -234,8 +234,8 @@ public class JmxMgr {
     }
 }
 ```
-运行结果如下
-![](pic/13Monitor/LogEndOffset.png)
+运行结果如下   
+![](pic/13Monitor/LogEndOffset.png)    
 在此只获取了两个broker节点的LogEndOffset信息，在实际生产中需要获取所有broker节点的数据，并根据指标不同进行汇总、最大等处理，才是真实的集群监控指标
 
 部分代码源自：https://hiddenpps.blog.csdn.net/

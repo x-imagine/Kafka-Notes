@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
  * @anthor lcl
  */
 public class PartitionOperator {
+
     private static String TOPIC_NAME = "partition-test-topic";
 
     /**

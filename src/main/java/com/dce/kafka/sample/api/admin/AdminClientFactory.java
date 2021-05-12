@@ -13,7 +13,9 @@ import static com.dce.kafka.constants.Cons.HOST_PORT;
  * 获取AdminClient
  */
 public class AdminClientFactory {
+
     private final static Logger LOGGER = LoggerFactory.getLogger(AdminClientFactory.class);
+
     /**
      * 获取AdminClient
      * @return AdminClient

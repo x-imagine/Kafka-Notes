@@ -59,7 +59,7 @@ kafka-topics.sh --delete --topic topic-1,topic-2 --bootstrap-server 192.168.137.
 ```
 kafka-topics.sh --alter --partitions 4 --topic topic-a --bootstrap-server 192.168.137.88:9092
 ```
-![](pic/99Commands/increase-partition.png)
+![](pic/99Commands/increase-partition.png)   
 注：不能改小，只能改大
 
 - 修改topic配置
@@ -239,7 +239,7 @@ kafka-console-producer.sh --topic topic-a --bootstrap-server 192.168.137.88:9092
 ```
 kafka-console-producer.sh --topic topic-a --bootstrap-server 192.168.137.88:9092 --property parse.key=true
 ```
-![](pic/99Commands/producerByTopicWithKey.png)
+![](pic/99Commands/producerByTopicWithKey.png)   
 注：key与value之间需要用tab分隔
 
 ## kafka-console-consumer.sh
@@ -254,12 +254,12 @@ kafka-console-consumer.sh --topic topic-a --bootstrap-server 192.168.137.88:9092
 ```
 kafka-console-consumer.sh --bootstrap-server 192.168.137.88:9092 --topic topic-b --from-beginning 
 ```
-![](pic/99Commands/consumer-from-beginning.png)
+![](pic/99Commands/consumer-from-beginning.png)   
 从指定位移消费
 ```
 kafka-console-consumer.sh --bootstrap-server 192.168.137.88:9092 --topic topic-b --partition 0 --offset 2
 ```
-![](pic/99Commands/consumer-from-offset.png)
+![](pic/99Commands/consumer-from-offset.png)   
 注：必须指定分区，否则offset无法确定是哪个分区，同时，offset可以指定为earliest、latest或无符号数
 
 ### 3.指定partition消费
@@ -294,10 +294,12 @@ kafka-consumer-groups.sh --bootstrap-server 192.168.137.88:9092 --describe --gro
 ```
 kafka-consumer-groups.sh --bootstrap-server 192.168.137.88:9092 --describe --group test_consumer_group_id --state
 ```
-- stable：有消费者成员
+- stable：有消费者成员   
 ![](pic/99Commands/consumer-groups-state.png)
-- empty：无消费者成员
-![](pic/99Commands/consumer-groups-state-empty.png)
+  
+
+- empty：无消费者成员   
+![](pic/99Commands/consumer-groups-state-empty.png)   
 其他状态：
 - prepareingRebalance：准备再平衡
 - completeRebalance：完成再平衡
@@ -370,8 +372,8 @@ kafka-consumer-perf-test.sh --bootstrap-server 192.168.137.88:9092 --topic topic
  kafka-delete-records.sh --bootstrap-server 192.168.137.88:9092 --offset-json-file delete-records.json
 ```
 ![](pic/99Commands/delete-record-json.png)
-![](pic/99Commands/delete-records.png)
-注：json脚本中的offset是从清除后的low_watermark，即保留到哪个offset，而不是从哪个offset删；如果是1000，执行脚本后，该分区的offset就从1000起，1000之前的消息都删除
+![](pic/99Commands/delete-records.png)    
+注：json脚本中的offset是从清除后的low_watermark，即保留到哪个offset，而不是从哪个offset删；如果是1000，执行脚本后，该分区的offset就从1000起，1000之前的消息都删除   
 ![](pic/99Commands/delete-records-result.png)
 
 ## kafka-dump-log.sh
@@ -445,7 +447,7 @@ kafka-log-dirs.sh --bootstrap-server 192.168.137.88:9092 --broker-list 0 --descr
 kafka-replica-verification.sh --broker-list 192.168.137.88:9092
 kafka-replica-verification.sh --broker-list 192.168.137.88:9092 --topic-white-list topic-b --report-interval-ms 1000
 ```
-![](pic/99Commands/replica-varification.png)
+![](pic/99Commands/replica-varification.png)    
 如图，在有消息生产时，部分分区是在时间点上是有一些同步延迟的记录的，有哪个分区被监控到就打印哪个，所以不用关注为什么打印的是一个分区，其他的怎么没监控，因为监控的是among的后的74个partition
 
 ## kafka-verifiable-consumer.sh
@@ -518,7 +520,7 @@ kafka-verifiable-producer.sh --bootstrap-server 192.168.137.88:9092 --topic topi
 ```
 kafka-run-class.sh kafka.tools.GetOffsetShell
 ```
-![](pic/99Commands/kafka-run-class-GetOffsetShell.png)
+![](pic/99Commands/kafka-run-class-GetOffsetShell.png)    
 根据说明使用参数获取topic最大位移
 ```
 kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 192.168.137.88:9092 --topic topic-b --time -1

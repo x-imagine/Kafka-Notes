@@ -14,7 +14,7 @@
             <version>2.6.4</version>
         </dependency>
 ```
-注：需要在spring官网查看kafka与spring版本关系
+注：需要在spring官网查看kafka与spring版本关系   
 ![](pic/12Kafka&Spring/version.png)
 - 在application.yml文件增加springboot中kafka相关配置
 ```
@@ -61,9 +61,9 @@ public class KafkaProducer {
     }
 }
 ```
-Spring负责将KafkaTemplate实例化，实例中读取了yml中的配置   
-![](pic/12Kafka&Spring/kafkaTemplate.png)
-send包括多种重载方法   
+Spring负责将KafkaTemplate实例化，实例中读取了yml中的配置     
+![](pic/12Kafka&Spring/kafkaTemplate.png)   
+send包括多种重载方法    
 ![](pic/12Kafka&Spring/send.png)
 
 ### consumer

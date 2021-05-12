@@ -40,8 +40,6 @@ public class ConsumerOperator {
         // consumerSeek();
     }
 
-
-
     /**
      * 自动提交（不推荐的方式）
      */
@@ -104,7 +102,6 @@ public class ConsumerOperator {
     public static void consumerNotAutoCommit() {
         Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-
         KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
         kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
 
@@ -123,11 +120,9 @@ public class ConsumerOperator {
      * 逐个partition处理并提交（为未来多线程处理partition做准备）
      */
     public static void consumerCommitBypartition() {
-
         Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);
-
         kafkaConsumer.subscribe(Arrays.asList(TEST_TOPIC_NAME_MUTI_PARTITION));
 
         while (true) {
@@ -152,7 +147,6 @@ public class ConsumerOperator {
      * 指定订阅某些个partition（模拟多线程的某个线程处理部分partition）
      */
     public static void consumerCommitBySomePartition() {
-
         Properties properties = CsmConfig.initConfig(StringDeserializer.class.getName(), StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(properties);

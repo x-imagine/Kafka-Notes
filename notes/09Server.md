@@ -48,8 +48,9 @@ Kafka自定义了一组二进制TCP协议，每种类型的协议都有对应的
 - 多级时间轮结构类似：时间轮分多层级，每个层级都偶tickMs、wheelSize，每上升一个层级，tickMs是其下级的时间跨度之和，wheelSize相等
 - 多级时间轮量级渐进：如最低级tickMs=1ms，wheelSize=20，总跨度20ms，则其上级tickMs=20ms，wheelSize=20，总跨度400ms，以此类推，第三层级为8000ms，第四层级为160000ms
 - 根据总时间跨度绝对时间轮升级：当一层时间轮的度量，无法承载预期任务计划的时间长度时，如单轮时间机制描述的wheelSize=20ms的轮遇到350ms的任务情况，则任务升级到上一级时间轮的17个时间片（350/20），如果另有任务大于400ms，则再升级时间轮，以此类推
-- 根据流逝后剩余时间决定时间轮降级：如350ms的任务在二级时间轮，当时间流逝至340ms时，剩余10ms的时间在当前时间轮无法精确描述，则降级至低级时间轮，在低级时间轮经理10个时间片后，开始执行任务
+- 根据流逝后剩余时间决定时间轮降级：如350ms的任务在二级时间轮，当时间流逝至340ms时，剩余10ms的时间在当前时间轮无法精确描述，则降级至低级时间轮，在低级时间轮经理10个时间片后，开始执行任务   
 ![](pic/09Server/time_wheel_muti.png)
+![](pic/09Server/Timing-Wheel.png)
 #### 扩展
 - 时间轮在创建时，以系统当前时间为第一层时间轮的起始时间
 - 通过TimeSYSTEM.hiResClockMs获取精确时间，System.currentTimeMillis()在某些操作系统下不能组合精确到毫秒级
@@ -77,9 +78,9 @@ kafka集群中有一个broker（同一时间仅会有一个）会被选为控制
 ### 选举
 - 控制器选举依赖zookeeper，zookeeper下创建controller节点保存控制器信息，其中包括控制器broker id及当选时间（时间戳）
 - 正常选举过程：   
-1.broker启动时，读取zookeeper下的controller节点
-2.当节点中brokerid值不为-1，则表示已有broker当选为控制器，不再竞选
-3.当节点中不存在controller节点，就尝试创建/controller节点，成为控制器（可能同时有多个创建者，只有成功的那一个当选）
+1.broker启动时，读取zookeeper下的controller节点   
+2.当节点中brokerid值不为-1，则表示已有broker当选为控制器，不再竞选   
+3.当节点中不存在controller节点，就尝试创建/controller节点，成为控制器（可能同时有多个创建者，只有成功的那一个当选）   
 ### 退位
 - 每个broker会对/controller节点添加监听器，当节点数据发生变化时，broker会更新自身内存中保存的activeController
 - 如果broker自身是控制器，但在数据变更后自身的broker id已不再是控制器，则其自动退位，关闭资源、状态机、监听等

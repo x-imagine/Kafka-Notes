@@ -181,6 +181,8 @@ public class ConsumerRecord<K, V> {
 - offset处理不当可能导致重复消费，即消费一半，未提交同步，程序宕掉，重新拉起，刚刚消费掉的消息重复消费；消息丢失，即未消费的消息已经提交同步，但宕掉，重新拉起，遗失了宕前未消费部分
 - 提交模式：自动（系统默认）、手动（enable.auto.commit设置为false）
 
+![](pic/05Consumer/offset_commit.png)
+
 ### 6.consumer手动提交
 ```
     public static void consumerNotAutoCommit() {
